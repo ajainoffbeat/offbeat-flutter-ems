@@ -1,4 +1,7 @@
+import 'package:ems_offbeat/screens/forgot_password.dart';
+import 'package:ems_offbeat/screens/reset_screen.dart';
 import 'package:flutter/material.dart';
+import 'screens/signin_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 
@@ -16,7 +19,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
-        '/home': (context) => const HomeScreen(),
+        "/signin": (_) => SignInScreen(),
+        "/forgot": (_) =>  ForgotPasswordScreen(),
+        "/reset": (_) =>  ResetPasswordScreen(),
       },
     );
   }
