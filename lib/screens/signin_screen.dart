@@ -19,21 +19,18 @@ class SignInScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Back arrow
               const SizedBox(height: 100),
-              // Title
-              // Illustration
               Center(
                 child: Image.asset(
-                  "assets/images/welcome.png",  // <--- use your image path
+                  "assets/images/welcome.png",
                   height: 200,
                 ),
               ),
               const Text(
                 "Sign in now",
                 style: TextStyle(
-                  fontSize: 40,
-                  fontWeight:  FontWeight.w900,
+                  fontSize: 25,
+                  fontWeight:  FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 5),
@@ -42,8 +39,8 @@ class SignInScreen extends StatelessWidget {
               Text(
                 "Please sign in to continue our app",
                 style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 15,
+                  color: const Color.fromARGB(255, 70, 69, 69),
+                  fontSize: 16,
                 ),
               ),
 
