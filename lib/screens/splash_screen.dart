@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Auto navigation
     Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(context, '/signin');
     });
   }
 
