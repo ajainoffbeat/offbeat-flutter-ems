@@ -1,0 +1,91 @@
+import 'package:ems_offbeat/screens/custom_input.dart';
+import 'package:ems_offbeat/screens/primary_button.dart';
+import 'package:flutter/material.dart';
+
+
+class SignInScreen extends StatelessWidget {
+  const SignInScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final emailCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 100),
+              Center(
+                child: Image.asset(
+                  "assets/images/welcome.png",
+                  height: 200,
+                ),
+              ),
+              const Text(
+                "Sign in now",
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight:  FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+
+              // Subtitle
+              Text(
+                "Please sign in to continue our app",
+                style: TextStyle(
+                  color: const Color.fromARGB(255, 70, 69, 69),
+                  fontSize: 16,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+
+              // Email Field
+              CustomInput(
+                controller: emailCtrl,
+                hint: "Email",
+              ),
+              const SizedBox(height: 15),
+
+              // Password Field
+              CustomInput(
+                controller: passCtrl,
+                hint: "Password",
+                isPassword: true,
+              ),
+
+              const SizedBox(height: 8),
+
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/forgot");
+                  },
+                  child: const Text(
+                    "Forgot Password?",
+                    style: TextStyle(color: Color(0xff006cf1)),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              // Sign In Button (Reusable Button)
+              PrimaryButton(
+                text: "Sign In",
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
