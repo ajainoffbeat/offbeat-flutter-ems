@@ -1,5 +1,7 @@
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
 import 'package:ems_offbeat/screens/forgot_password.dart';
+import 'package:ems_offbeat/screens/leaves/leave_request_screen.dart';
+import 'package:ems_offbeat/screens/leaves/leaves_screen.dart';
 import 'package:ems_offbeat/screens/reset_screen.dart';
 import 'package:flutter/material.dart';
 import 'screens/signin_screen.dart';
@@ -25,6 +27,8 @@ class MyApp extends StatelessWidget {
         "/forgot": (_) =>  ForgotPasswordScreen(),
         "/reset": (_) =>  ResetPasswordScreen(),
         '/home':(_) => HomeScreen(),
+         '/leaves': (_) => const LeavesScreen(),
+         '/leave-request': (_) => const LeaveRequestScreen(),
       },
     );
   }
