@@ -16,6 +16,20 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
   final TextEditingController reasonController = TextEditingController();
 
+  // -------- SHORT LEAVE SLOTS (2 HOUR FIXED) --------
+  final List<String> shortLeaveSlots = [
+    "09:00 - 11:00",
+    "11:00 - 13:00",
+    "13:00 - 15:00",
+    "15:00 - 17:00",
+    "17:00 - 19:00",
+    "18:00 - 20:00",
+  ];
+  String? selectedShortSlot;
+
+  // -------- HALF DAY SELECTION --------
+  String? selectedHalf;
+
   Future<void> pickFromDate() async {
     DateTime now = DateTime.now();
     final picked = await showDatePicker(
@@ -29,7 +43,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
       setState(() {
         fromDate = picked;
         if (toDate != null && toDate!.isBefore(fromDate!)) {
-          toDate = null; // reset if previous "to" date becomes invalid
+          toDate = null;
         }
       });
     }
@@ -40,7 +54,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
     final picked = await showDatePicker(
       context: context,
-      firstDate: fromDate!, // cannot select earlier date
+      firstDate: fromDate!,
       lastDate: DateTime(DateTime.now().year + 2),
       initialDate: toDate ?? fromDate!,
     );
@@ -56,15 +70,13 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfff7f8fc),
-
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              /// ---------------------- HEADER ----------------------
+              // ---------------------- HEADER ----------------------
               Row(
                 children: [
                   IconButton(
@@ -82,43 +94,153 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48) // balance spacing with back button
+                  const SizedBox(width: 48),
                 ],
               ),
 
               const SizedBox(height: 10),
 
-              /// ---------------------- LEAVE TYPE ----------------------
-              const Text("Leave Type", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              // ---------------------- LEAVE TYPE ----------------------
+              const Text(
+                "Leave Type",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 6),
 
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedLeaveType,
-                    hint: const Text("Select Leave Type"),
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    items: leaveTypes.map((t) {
-                      return DropdownMenuItem(
-                        value: t,
-                        child: Text(t),
-                      );
-                    }).toList(),
-                    onChanged: (val) => setState(() => selectedLeaveType = val),
+              SizedBox(
+                width: double.infinity, // 👈 Makes it full width
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded:
+                          true, // 👈 Important for dropdown text full width
+                      value: selectedLeaveType,
+                      hint: const Text("Select Leave Type"),
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      items: leaveTypes.map((t) {
+                        return DropdownMenuItem(value: t, child: Text(t));
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          selectedLeaveType = val;
+                          selectedShortSlot = null;
+                          selectedHalf = null;
+                        });
+                      },
+                    ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              /// ---------------------- DATE PICKERS ----------------------
-              const Text("Date", style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              // ---------------------- SHORT LEAVE SLOTS ----------------------
+              if (selectedLeaveType == "Short Leave") ...[
+                const Text(
+                  "Select Short Leave Slot",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 10),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    double itemWidth = (constraints.maxWidth - 10) / 2;
+                    // 10 = spacing between the two items
+
+                    return Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: shortLeaveSlots.map((slot) {
+                        final bool isSelected = selectedShortSlot == slot;
+
+                        return GestureDetector(
+                          onTap: () => setState(() => selectedShortSlot = slot),
+                          child: Container(
+                            width: itemWidth, // 👈 EXACT HALF-WIDTH
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                              horizontal: 14,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected ? Colors.blue : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.blue
+                                    : Colors.grey.shade300,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.shade200,
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              slot,
+                              style: TextStyle(
+                                color: isSelected ? Colors.white : Colors.black,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 20),
+              ],
+
+              // ---------------------- HALF DAY OPTIONS ----------------------
+              if (selectedLeaveType == "Half Day") ...[
+  const Text(
+    "Choose Half",
+    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+  ),
+  const SizedBox(height: 8),
+
+  Column(
+    children: [
+      RadioListTile<String>(
+        contentPadding: EdgeInsets.zero,        // REMOVE LEFT INDENT
+        visualDensity: VisualDensity.compact,   // TIGHTER LOOK
+        title: const Text("First Half (9 AM - 1 PM)"),
+        value: "First Half",
+        groupValue: selectedHalf,
+        onChanged: (value) {
+          setState(() => selectedHalf = value);
+        },
+      ),
+      RadioListTile<String>(
+        contentPadding: EdgeInsets.zero,
+        visualDensity: VisualDensity.compact,
+        title: const Text("Second Half (1 PM - 5 PM)"),
+        value: "Second Half",
+        groupValue: selectedHalf,
+        onChanged: (value) {
+          setState(() => selectedHalf = value);
+        },
+      ),
+    ],
+  ),
+],
+
+
+              // ---------------------- DATE PICKERS (shown in all leave types) ----------------------
+              const Text(
+                "Date",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 10),
 
               Row(
@@ -127,7 +249,10 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                     child: GestureDetector(
                       onTap: pickFromDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
@@ -136,9 +261,11 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(fromDate == null
-                                ? "From"
-                                : "${fromDate!.day}/${fromDate!.month}/${fromDate!.year}"),
+                            Text(
+                              fromDate == null
+                                  ? "From"
+                                  : "${fromDate!.day}/${fromDate!.month}/${fromDate!.year}",
+                            ),
                             const Icon(Icons.calendar_today, size: 18),
                           ],
                         ),
@@ -152,7 +279,10 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                     child: GestureDetector(
                       onTap: pickToDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                          horizontal: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
@@ -161,9 +291,11 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(toDate == null
-                                ? "Till"
-                                : "${toDate!.day}/${toDate!.month}/${toDate!.year}"),
+                            Text(
+                              toDate == null
+                                  ? "Till"
+                                  : "${toDate!.day}/${toDate!.month}/${toDate!.year}",
+                            ),
                             const Icon(Icons.calendar_today, size: 18),
                           ],
                         ),
@@ -175,9 +307,11 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
               const SizedBox(height: 20),
 
-              /// ---------------------- REASON ----------------------
-              const Text("Reason for absence",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+              // ---------------------- REASON ----------------------
+              const Text(
+                "Reason for absence",
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 6),
 
               Container(
@@ -199,7 +333,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
 
               const Spacer(),
 
-              /// ---------------------- SUBMIT BUTTON ----------------------
+              // ---------------------- SUBMIT BUTTON ----------------------
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -207,9 +341,14 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     backgroundColor: Colors.blue,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                  child: const Text("Send", style: TextStyle(fontSize: 16, color: Colors.white)),
+                  child: const Text(
+                    "Send",
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
                 ),
               ),
 

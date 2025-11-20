@@ -16,20 +16,20 @@ class _LeavesScreenState extends State<LeavesScreen> {
 
   final List<LeaveModel> leaves = [
     LeaveModel(
-      startDate: "25/5/2023",
-      endDate: "25/5/2023",
+      startDate: "25/11/2025",
+      endDate: "25/11/2025",
       type: "Short Leave",
       status: LeaveStatus.submitted,
     ),
     LeaveModel(
-      startDate: "5/5/2023",
-      endDate: "6/5/2023",
+      startDate: "5/11/2025",
+      endDate: "6/11/2025",
       type: "Full-day Leave",
       status: LeaveStatus.accepted,
     ),
     LeaveModel(
-      startDate: "14/5/2023",
-      endDate: "17/4/2023",
+      startDate: "14/11/2025",
+      endDate: "17/4/2025",
       type: "Full-day Leave",
       status: LeaveStatus.rejected,
     ),
