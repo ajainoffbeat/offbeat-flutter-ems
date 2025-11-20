@@ -4,7 +4,8 @@ import 'widgets/leave_card.dart';
 import 'widgets/leave_filter_bar.dart';
 
 class LeavesScreen extends StatefulWidget {
-  const LeavesScreen({super.key});
+  final String role; // "employee", "manager", "admin"
+  const LeavesScreen({super.key, required this.role});
 
   @override
   State<LeavesScreen> createState() => _LeavesScreenState();
@@ -54,12 +55,10 @@ class _LeavesScreenState extends State<LeavesScreen> {
       body: SafeArea(
         child: Column(
           children: [
-        
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
-               
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
@@ -71,7 +70,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
                             blurRadius: 4,
-                          )
+                          ),
                         ],
                       ),
                       child: const Icon(Icons.arrow_back_ios_new, size: 18),
@@ -82,21 +81,16 @@ class _LeavesScreenState extends State<LeavesScreen> {
 
                   const Text(
                     "Leaves",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
 
                   const Spacer(),
 
-                  
                   const SizedBox(width: 40),
                 ],
               ),
             ),
 
-        
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: LeaveFilterBar(
@@ -109,18 +103,32 @@ class _LeavesScreenState extends State<LeavesScreen> {
 
             const SizedBox(height: 10),
 
-        
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: ListView.builder(
                   itemCount: filteredLeaves.length,
-                  itemBuilder: (_, i) => LeaveCard(leave: filteredLeaves[i]),
+                  itemBuilder: (_, i) {
+                    return LeaveCard(
+                      leave: filteredLeaves[i],
+                      isManager: widget.role != "employee",
+                      onAccept: () {
+                        setState(() {
+                          filteredLeaves[i].status = LeaveStatus.accepted;
+                        });
+                      },
+                      onReject: (reason) {
+                        setState(() {
+                          filteredLeaves[i].status = LeaveStatus.rejected;
+                          filteredLeaves[i].rejectionReason = reason;
+                        });
+                      },
+                    );
+                  },
                 ),
               ),
             ),
 
-       
             Padding(
               padding: EdgeInsets.only(
                 left: 16,
@@ -148,7 +156,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
                       Text(
                         "Leave Request",
                         style: TextStyle(fontSize: 16, color: Colors.white),
-                      )
+                      ),
                     ],
                   ),
                 ),
