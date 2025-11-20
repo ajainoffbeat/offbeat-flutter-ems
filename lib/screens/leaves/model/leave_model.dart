@@ -1,15 +1,17 @@
 enum LeaveStatus { submitted, accepted, rejected }
 
 class LeaveModel {
-  final String startDate;
-  final String endDate;
-  final String type;
-  final LeaveStatus status;
+  String startDate;
+  String endDate;
+  String type;
+  LeaveStatus status;
+  String? rejectionReason;
 
   LeaveModel({
     required this.startDate,
     required this.endDate,
     required this.type,
-    required this.status,
+    this.status = LeaveStatus.submitted,
+    this.rejectionReason,
   });
 }

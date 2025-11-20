@@ -30,6 +30,9 @@ class FeatureGrid extends StatelessWidget {
             if (features[i]["label"] == "Leaves") {
               Navigator.pushNamed(context, '/leaves');
             }
+              if (features[i]["label"] == "Attendance") {
+              Navigator.pushNamed(context, '/manage-leaves');
+            }
           },
           child: Column(
             children: [

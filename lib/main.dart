@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
         "/forgot": (_) =>  ForgotPasswordScreen(),
         "/reset": (_) =>  ResetPasswordScreen(),
         '/home':(_) => HomeScreen(),
-         '/leaves': (_) => const LeavesScreen(),
-         '/leave-request': (_) => const LeaveRequestScreen(),
+        '/leaves': (_) => const LeavesScreen(role: "manager"),
+        '/leave-request': (_) => const LeaveRequestScreen(),
       },
     );
   }

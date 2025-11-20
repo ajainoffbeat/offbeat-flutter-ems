@@ -3,8 +3,45 @@ import '../model/leave_model.dart';
 
 class LeaveCard extends StatelessWidget {
   final LeaveModel leave;
+  final bool isManager;
+  final VoidCallback? onAccept;
+  final Function(String reason)? onReject;
 
-  const LeaveCard({super.key, required this.leave});
+  const LeaveCard({
+    super.key,
+    required this.leave,
+    this.isManager = false,
+    this.onAccept,
+    this.onReject,
+  });
+
+  void showRejectPopup(BuildContext context) {
+    final reasonCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text("Reject Reason"),
+        content: TextField(
+          controller: reasonCtrl,
+          decoration: InputDecoration(hintText: "Enter reason"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onReject?.call(reasonCtrl.text);
+            },
+            child: Text("Submit"),
+          ),
+        ],
+      ),
+    );
+  }
 
   Color _statusColor(LeaveStatus status) {
     switch (status) {
@@ -42,7 +79,7 @@ class LeaveCard extends StatelessWidget {
             blurRadius: 5,
             spreadRadius: 2,
             offset: const Offset(0, 3),
-          )
+          ),
         ],
       ),
       child: Row(
@@ -71,16 +108,52 @@ class LeaveCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  leave.type,
-                  style: const TextStyle(
-                    fontSize: 14,
+                Text(leave.type, style: const TextStyle(fontSize: 14)),
+
+                // Manager Action Buttons
+                if (isManager) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: onAccept,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                            foregroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                           
+                          ),
+                          child: Text(
+                          "Approve",
+                          style: TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => showRejectPopup(context),
+                          style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                            foregroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          child: Text("Reject"),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
+                ],
               ],
             ),
           ),
 
+         if(!isManager) ...[
           // status
           Text(
             _statusText(leave.status),
@@ -89,6 +162,8 @@ class LeaveCard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+         ]
+         
         ],
       ),
     );
