@@ -1,4 +1,4 @@
-package com.example.ems_offbeat
+package com.offbeatsoftwaresolutions.ems
 
 import io.flutter.embedding.android.FlutterActivity
 
