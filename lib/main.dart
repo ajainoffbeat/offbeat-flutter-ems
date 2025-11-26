@@ -1,13 +1,13 @@
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
-import 'package:ems_offbeat/screens/forgot_password.dart';
-import 'package:ems_offbeat/screens/leaves/leave_request_screen.dart';
-import 'package:ems_offbeat/screens/leaves/leaves_screen.dart';
-import 'package:ems_offbeat/screens/notification/notification.dart';
-import 'package:ems_offbeat/screens/reset_screen.dart';
+import 'package:ems_offbeat/app/auth_screen/forgot_password.dart';
+import 'package:ems_offbeat/app/leaves_screen/leave_request_screen.dart';
+import 'package:ems_offbeat/app/leaves_screen/leaves_screen.dart';
+import 'package:ems_offbeat/app/notification_screen/notification.dart';
+import 'package:ems_offbeat/app/auth_screen/reset_screen.dart';
 import 'package:flutter/material.dart';
-import 'screens/signin_screen.dart';
-import 'screens/splash_screen.dart';
-import 'screens/home_screen.dart';
+import 'app/auth_screen/signin_screen.dart';
+import 'app/splash_screen.dart';
+import 'app/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/notification_provider.dart';
 void main() {

@@ -1,5 +1,5 @@
-import 'package:ems_offbeat/screens/custom_input.dart';
-import 'package:ems_offbeat/screens/primary_button.dart' show PrimaryButton;
+import 'package:ems_offbeat/app/custom_input.dart';
+import 'package:ems_offbeat/widgets/primary_button.dart' show PrimaryButton;
 import 'package:flutter/material.dart';
 
 class ResetPasswordScreen extends StatelessWidget {

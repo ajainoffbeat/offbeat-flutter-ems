@@ -1,5 +1,5 @@
-import 'package:ems_offbeat/screens/custom_input.dart';
-import 'package:ems_offbeat/screens/primary_button.dart';
+import 'package:ems_offbeat/app/custom_input.dart';
+import 'package:ems_offbeat/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 
 class SignInScreen extends StatelessWidget {
