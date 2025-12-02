@@ -1,4 +1,5 @@
 import 'package:ems_offbeat/app/custom_input.dart';
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/primary_button.dart' show PrimaryButton;
 import 'package:flutter/material.dart';
 
@@ -11,7 +12,7 @@ class ResetPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppThemeData.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -20,7 +21,10 @@ class ResetPasswordScreen extends StatelessWidget {
             children: [
               // ← back button
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color:AppThemeData.primary500
+                  ),
                 onPressed: () => Navigator.pop(context),
               ),
 
@@ -43,6 +47,7 @@ class ResetPasswordScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
+                     color: AppThemeData.grey900,
                   ),
                 ),
               ),
