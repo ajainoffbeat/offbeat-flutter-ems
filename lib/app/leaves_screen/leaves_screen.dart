@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'model/leave_model.dart';
 import 'widgets/leave_card.dart';
@@ -51,7 +52,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfff7f8fc),
+      backgroundColor: AppThemeData.surfaceLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -65,10 +66,10 @@ class _LeavesScreenState extends State<LeavesScreen> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: AppThemeData.surface,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: AppThemeData.grey400.withOpacity(0.05),
                             blurRadius: 4,
                           ),
                         ],
@@ -143,7 +144,7 @@ class _LeavesScreenState extends State<LeavesScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppThemeData.primary500,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),

@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import '../model/leave_model.dart';
 
@@ -71,7 +72,7 @@ class LeaveCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppThemeData.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -89,7 +90,7 @@ class LeaveCard extends StatelessWidget {
             width: 4,
             height: 55,
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: AppThemeData.primary400,
               borderRadius: BorderRadius.circular(6),
             ),
           ),
@@ -119,8 +120,8 @@ class LeaveCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: onAccept,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                            foregroundColor: Colors.green,
+                            backgroundColor: AppThemeData.surface,
+                            foregroundColor: AppThemeData.success500,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
@@ -128,7 +129,7 @@ class LeaveCard extends StatelessWidget {
                           ),
                           child: Text(
                           "Approve",
-                          style: TextStyle(color: Colors.green),
+                          style: TextStyle(color: AppThemeData.success500),
                           ),
                         ),
                       ),
@@ -137,8 +138,8 @@ class LeaveCard extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () => showRejectPopup(context),
                           style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
-                            foregroundColor: Colors.red,
+                        backgroundColor: AppThemeData.surface,
+                            foregroundColor: AppThemeData.danger500,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),

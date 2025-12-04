@@ -1,5 +1,6 @@
-import 'package:ems_offbeat/screens/custom_input.dart';
-import 'package:ems_offbeat/screens/primary_button.dart';
+import 'package:ems_offbeat/app/custom_input.dart';
+import 'package:ems_offbeat/theme/app_theme.dart';
+import 'package:ems_offbeat/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 
 class SignInScreen extends StatelessWidget {
@@ -11,7 +12,7 @@ class SignInScreen extends StatelessWidget {
     final passCtrl = TextEditingController();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppThemeData.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -51,7 +52,7 @@ class SignInScreen extends StatelessWidget {
               Text(
                 "Please sign in to continue our app",
                 style: TextStyle(
-                  color: Color(0xFF464545),
+                  color: AppThemeData.grey600,
                   fontSize: 16,
                 ),
               ),
@@ -78,7 +79,7 @@ class SignInScreen extends StatelessWidget {
                   },
                   child: const Text(
                     "Forgot Password?",
-                    style: TextStyle(color: Color(0xff006cf1)),
+                    style: TextStyle(color:AppThemeData.primary500),
                   ),
                 ),
               ),

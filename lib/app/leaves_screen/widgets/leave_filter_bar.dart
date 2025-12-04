@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class LeaveFilterBar extends StatelessWidget {
@@ -35,10 +36,10 @@ class LeaveFilterBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
           decoration: BoxDecoration(
-            color: isActive ? Colors.blue : Colors.grey[200],
+            color: isActive ? AppThemeData.primary400 : AppThemeData.grey200,
             borderRadius: BorderRadius.circular(30),
             border: Border.all(
-              color: isActive ? Colors.blue : Colors.grey.shade300,
+              color: isActive ? AppThemeData.primary400 : AppThemeData.grey200,
             ),
           ),
           child: Text(

@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class LeaveRequestScreen extends StatefulWidget {
@@ -112,7 +113,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppThemeData.surface,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
@@ -168,16 +169,16 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                               horizontal: 14,
                             ),
                             decoration: BoxDecoration(
-                              color: isSelected ? Colors.blue : Colors.white,
+                              color: isSelected ? AppThemeData.primary400 : AppThemeData.surface,
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: isSelected
-                                    ? Colors.blue
-                                    : Colors.grey.shade300,
+                                    ? AppThemeData.primary400
+                                    : AppThemeData.grey200,
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.grey.shade200,
+                                  color: AppThemeData.grey200,
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -186,7 +187,7 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                             child: Text(
                               slot,
                               style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.black,
+                                color: isSelected ? AppThemeData.surface : Colors.black,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -254,9 +255,9 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                           horizontal: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppThemeData.surface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: AppThemeData.grey200),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -284,9 +285,9 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                           horizontal: 12,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: AppThemeData.surface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: AppThemeData.grey200),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -317,9 +318,9 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppThemeData.surface,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: AppThemeData.grey200),
                 ),
                 child: TextField(
                   controller: reasonController,
@@ -340,14 +341,14 @@ class _LeaveRequestScreenState extends State<LeaveRequestScreen> {
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: Colors.blue,
+                    backgroundColor: AppThemeData.primary400,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: const Text(
                     "Send",
-                    style: TextStyle(fontSize: 16, color: Colors.white),
+                    style: TextStyle(fontSize: 16, color: AppThemeData.surface),
                   ),
                 ),
               ),
