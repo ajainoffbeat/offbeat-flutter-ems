@@ -19,23 +19,35 @@ class FeatureGrid extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate:
-          const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4,childAspectRatio: .9),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        childAspectRatio: .9,
+      ),
       itemCount: features.length,
       itemBuilder: (context, i) {
-        return Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xffd8f5ff),
-                shape: BoxShape.circle,
+        return InkWell(
+          onTap: () {
+            if (features[i]["label"] == "Leaves") {
+              Navigator.pushNamed(context, '/leaves');
+            }
+              if (features[i]["label"] == "Attendance") {
+              Navigator.pushNamed(context, '/manage-leaves');
+            }
+          },
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: const BoxDecoration(
+                  color: Color(0xffd8f5ff),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(features[i]["icon"], color: Colors.blue, size: 26),
               ),
-              child: Icon(features[i]["icon"], color: Colors.blue, size: 26),
-            ),
-            const SizedBox(height: 6),
-            Text(features[i]["label"], style: const TextStyle(fontSize: 12))
-          ],
+              const SizedBox(height: 6),
+              Text(features[i]["label"], style: const TextStyle(fontSize: 12)),
+            ],
+          ),
         );
       },
     );

@@ -1,7 +1,7 @@
-import 'package:ems_offbeat/screens/custom_input.dart';
-import 'package:ems_offbeat/screens/primary_button.dart';
+import 'package:ems_offbeat/app/custom_input.dart';
+import 'package:ems_offbeat/theme/app_theme.dart';
+import 'package:ems_offbeat/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
-
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -12,55 +12,64 @@ class SignInScreen extends StatelessWidget {
     final passCtrl = TextEditingController();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppThemeData.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 100),
-              Center(
+              // --- LOGO ---
+              SizedBox(
+                width: 200,  
                 child: Image.asset(
-                  "assets/images/welcome.png",
-                  height: 200,
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
                 ),
               ),
+
+              const SizedBox(height: 10),
+
+              // --- WELCOME IMAGE ---
+              Image.asset(
+                "assets/images/welcome.png",
+                height: 150,   // reduced height
+                fit: BoxFit.contain,
+              ),
+
+              const SizedBox(height: 20),
+
               const Text(
                 "Sign in now",
                 style: TextStyle(
                   fontSize: 25,
-                  fontWeight:  FontWeight.bold,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 5),
 
-              // Subtitle
               Text(
                 "Please sign in to continue our app",
                 style: TextStyle(
-                  color: const Color.fromARGB(255, 70, 69, 69),
+                  color: AppThemeData.grey600,
                   fontSize: 16,
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
 
-              // Email Field
               CustomInput(
                 controller: emailCtrl,
                 hint: "Email",
               ),
               const SizedBox(height: 15),
 
-              // Password Field
               CustomInput(
                 controller: passCtrl,
                 hint: "Password",
                 isPassword: true,
               ),
-
-              const SizedBox(height: 8),
 
               Align(
                 alignment: Alignment.centerRight,
@@ -70,18 +79,21 @@ class SignInScreen extends StatelessWidget {
                   },
                   child: const Text(
                     "Forgot Password?",
-                    style: TextStyle(color: Color(0xff006cf1)),
+                    style: TextStyle(color:AppThemeData.primary500),
                   ),
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              // Sign In Button (Reusable Button)
               PrimaryButton(
                 text: "Sign In",
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, "/nav");
+                },
               ),
+
+              const SizedBox(height: 20),
             ],
           ),
         ),

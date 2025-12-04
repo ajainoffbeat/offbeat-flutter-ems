@@ -14,16 +14,16 @@ class TaskCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          Text("All About You (Website)",
+          Text("EMS Offbeat",
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
           SizedBox(height: 8),
-          Text("Assigned by: John Doe"),
+          Text("Assigned by: Amit Jain"),
           SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Start: March 4, 2023"),
-              Text("End: June 4, 2023"),
+              Text("Start: Nov, 2025"),
+              Text("End: Nov, 2025"),
             ],
           )
         ],

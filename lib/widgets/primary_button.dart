@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -21,7 +22,7 @@ class PrimaryButton extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xff006cf1),
+          backgroundColor: AppThemeData.primary500,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radius),
           ),
