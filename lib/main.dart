@@ -35,18 +35,59 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    print("🔥 initState triggered");
+    initPushNotification();
+  }
+
+  // REQUEST PERMISSION + GET TOKEN + FOREGROUND HANDLING
+  void initPushNotification() async {
+     print("🔥 initPushNotification called");
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+    // Permission for iOS & Android 13+
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      sound: true,
+      badge: true,
+    );
+
+    print(" 🔥  NOTIFICATION PERMISSION: ${settings.authorizationStatus}");
+
+    // Get FCM Token
+    String? token = await messaging.getToken();
+    print(" 🔥  FCM DEVICE TOKEN: $token");
+
+    // Foreground message listener
+    FirebaseMessaging.onMessage.listen((message) {
+      print("🔥 FOREGROUND MESSAGE: ${message.notification?.title}");
+    });
+
+    // When app is opened from notification
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print("🔥 OPENED APP FROM NOTIFICATION: ${message.notification?.title}");
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/splash',
+      initialRoute: '/signin',
       routes: {
         '/nav': (_) => const BottomNav(),
-        '/splash': (context) => const SplashScreen(),
+        // '/splash': (context) => const SplashScreen(),
         "/signin": (_) => SignInScreen(),
-        "/forgot": (_) =>  ForgotPasswordScreen(),
-        "/reset": (_) =>  ResetPasswordScreen(),
-        '/home':(_) => HomeScreen(),
-        '/leaves': (_) => const LeavesScreen(role: "manager"),
+        "/forgot": (_) => ForgotPasswordScreen(),
+        "/reset": (_) => ResetPasswordScreen(),
+        '/home': (_) => HomeScreen(),
+        '/leaves': (_) => const LeavesScreen(role: "employees"),
         '/leave-request': (_) => const LeaveRequestScreen(),
          "/notifications": (context) => const NotificationsScreen(),
       },
