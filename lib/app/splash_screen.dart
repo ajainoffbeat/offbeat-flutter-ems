@@ -1,6 +1,7 @@
 import 'dart:async';
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -50,8 +51,9 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
+              AppThemeData.primary500, // NEW COLOR #6e61ff
               Colors.white,
-              Color.fromARGB(186, 216, 233, 255), // soft grey for depth
+              Color.fromARGB(186, 216, 233, 255), // soft grey
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -63,12 +65,20 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Increased logo size
+                // Logo
                 SizedBox(
                   height: 300,
                   width: 300,
-                  child: Image.asset('assets/images/logo.png')
-                ),    
+                  child: Image.asset('assets/images/logo.png'),
+                ),
+
+                const SizedBox(height: 40),
+
+                // White SpinKit Loader
+                const SpinKitCircle(
+                  color: Colors.white,
+                  size: 50.0,
+                ),
               ],
             ),
           ),

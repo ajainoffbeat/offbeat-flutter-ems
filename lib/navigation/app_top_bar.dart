@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ems_offbeat/widgets/notification/notification_bell.dart';
 
 class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
   const AppTopBar({super.key});
@@ -24,9 +25,10 @@ class AppTopBar extends StatelessWidget implements PreferredSizeWidget {
       ),
 
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_none, color: Colors.black),
-          onPressed: () {},
+        NotificationBell(
+          onTap: () {
+            Navigator.pushNamed(context, "/notifications");
+          },
         ),
         const SizedBox(width: 12),
       ],
