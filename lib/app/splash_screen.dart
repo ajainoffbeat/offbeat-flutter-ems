@@ -34,7 +34,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Auto navigation
     Timer(const Duration(seconds: 5), () {
-      Navigator.pushReplacementNamed(context, '/signin');
+      // Navigator.pushReplacementNamed(context, '/signin');
+      Navigator.pushReplacementNamed(context, '/onboarding');
+
     });
   }
 
@@ -76,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen>
 
                 // White SpinKit Loader
                 const SpinKitCircle(
-                  color: Colors.white,
+                  color: AppThemeData.primary500,
                   size: 50.0,
                 ),
               ],
