@@ -105,7 +105,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: double.infinity,
                 color: AppThemeData.primary500,
               ),
+              
             ),
+
+           
+       
+          Container(
+              // height: 200,
+              width: double.infinity,
+              color: AppThemeData.primary500,
+              // decoration: BoxDecoration(
+              //   borderRadius: BorderRadius.circular(20),
+              // ),
+              child: ClipRRect(
+                // borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/images/onboarding_rec.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          
+      
 
             // BOTTOM WHITE
             Expanded(
@@ -114,10 +135,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(35),
-                    topRight: Radius.circular(35),
-                  ),
+                  // borderRadius: BorderRadius.only(
+                  //   topLeft: Radius.circular(35),
+                  //   topRight: Radius.circular(35),
+                  // ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -159,27 +180,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
         
         // IMAGE HALF BLUE + HALF WHITE
-        Positioned(
-          top: MediaQuery.of(context).size.height * 0.35,
-          left: 0,
-          right: 0,
-          child: Center(
-            child: Container(
-              height: 200,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  'assets/images/onboarding_rec.png',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-          ),
-        ),
+        // Positioned(
+        //   top: MediaQuery.of(context).size.height * 0.35,
+        //   left: 0,
+        //   right: 0,
+        //   child: Center(
+        //     child: Container(
+        //       height: 200,
+        //       width: double.infinity,
+        //       decoration: BoxDecoration(
+        //         borderRadius: BorderRadius.circular(20),
+        //       ),
+        //       child: ClipRRect(
+        //         borderRadius: BorderRadius.circular(20),
+        //         child: Image.asset(
+        //           'assets/images/onboarding_rec.png',
+        //           fit: BoxFit.cover,
+        //         ),
+        //       ),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }
@@ -215,7 +236,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           onPressed: () {
-            Navigator.pushReplacementNamed(context, "/signin");
+            Navigator.pushReplacementNamed(context, "/login");
           },
           child: const Text(
             "Skip",

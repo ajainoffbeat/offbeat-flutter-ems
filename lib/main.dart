@@ -1,9 +1,8 @@
+import 'package:ems_offbeat/app/auth_screen/update_password.dart';
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
-import 'package:ems_offbeat/app/auth_screen/forgot_password.dart';
 import 'package:ems_offbeat/app/leaves_screen/leave_request_screen.dart';
 import 'package:ems_offbeat/app/leaves_screen/leaves_screen.dart';
 import 'package:ems_offbeat/app/notification_screen/notification.dart';
-import 'package:ems_offbeat/app/auth_screen/reset_screen.dart';
 import 'package:flutter/material.dart';
 import 'app/auth_screen/login_screen.dart';
 import 'app/onboarding_screens/onboarding_screen.dart';
@@ -48,8 +47,7 @@ class MyApp extends StatelessWidget {
         "/onboarding": (_) => const OnboardingScreen(),
 
         "/login": (_) => LoginScreen(),
-        "/forgot": (_) => ForgotPasswordScreen(),
-        "/reset": (_) => ResetPasswordScreen(),
+        "/updatePassword":(_) => UpdatePasswordScreen(),
         '/home': (_) => HomeScreen(),
         '/leaves': (_) => const LeavesScreen(role: "manager"),
         '/leave-request': (_) => const LeaveRequestScreen(),

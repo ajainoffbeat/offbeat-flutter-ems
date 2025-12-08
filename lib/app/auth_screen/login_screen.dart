@@ -1,7 +1,6 @@
 import 'package:ems_offbeat/theme/app_theme.dart';
+import 'package:ems_offbeat/widgets/screen_headings.dart';
 import 'package:flutter/material.dart';
-import 'package:ems_offbeat/widgets/screen_subtitle.dart';
-import 'package:ems_offbeat/widgets/screen_title.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -16,25 +15,26 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 60),
 
               // Back button
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios_new),
-              ),
+              // IconButton(
+              //   onPressed: () => Navigator.pop(context),
+              //   icon: const Icon(Icons.arrow_back_ios_new),
+              // ),
 
-              const SizedBox(height: 10),
+              // const SizedBox(height: 10),
 
               // Updated header widgets
-              const ScreenTitle(text: "Welcome Back! 👋"),
+              const ScreenHeading(text: "Welcome Back! 👋"),
               const SizedBox(height: 6),
               const ScreenSubtitle(
                 text: "Log in and manage your HR tasks with ease",
               ),
 
               const SizedBox(height: 24),
-
+               const TitleText(text: "Email"),   // your custom bold widget
+              const SizedBox(height: 6),
               // Email Field
               TextField(
                 decoration: InputDecoration(
@@ -62,7 +62,8 @@ class LoginScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 16),
-
+                const TitleText(text: "Password"),   // your custom bold widget
+              const SizedBox(height: 6),
               // Password Field
               TextField(
                 obscureText: true,
@@ -111,9 +112,11 @@ class LoginScreen extends StatelessWidget {
                   const Text("Remember me"),
                   const Spacer(),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context,"/updatePassword");
+                    },
                     child: const Text(
-                      "Forgot Password?",
+                      "Update Password",
                       style: TextStyle(
                         fontSize: 15,
                         color: AppThemeData.primary500,
