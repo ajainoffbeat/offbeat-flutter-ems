@@ -1,12 +1,12 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
+    id("dev.flutter.flutter-gradle-plugin")   // Flutter Android embedding
+    id("com.google.gms.google-services")      // Firebase / FCM
 }
 
 android {
-    namespace = "com.example.ems_offbeat"
+    namespace = "com.offbeatsoftwaresolutions.ems"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,10 +20,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.ems_offbeat"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // MUST match your real package name + Firebase config
+        applicationId = "com.offbeatsoftwaresolutions.ems"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -32,8 +30,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // For now use debug signing so `flutter run --release` works
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -41,4 +38,12 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Firebase BOM – keeps versions aligned
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
 }
