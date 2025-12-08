@@ -1,7 +1,6 @@
+import 'package:ems_offbeat/app/leaves/leave_dashboard_screen.dart';
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
 import 'package:ems_offbeat/app/auth_screen/forgot_password.dart';
-import 'package:ems_offbeat/app/leaves_screen/leave_request_screen.dart';
-import 'package:ems_offbeat/app/leaves_screen/leaves_screen.dart';
 import 'package:ems_offbeat/app/notification_screen/notification.dart';
 import 'package:ems_offbeat/app/auth_screen/reset_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +10,7 @@ import 'app/splash_screen.dart';
 import 'app/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/notification_provider.dart';
-
+ 
 void main() {
   runApp(
     MultiProvider(
@@ -19,12 +18,12 @@ void main() {
         ChangeNotifierProvider(
           create: (_) {
             final p = NotificationProvider();
-
+ 
             // Add dummy notifications here
             p.addNotification();
             p.addNotification();
             p.addNotification();
-
+ 
             return p;
           },
         ),
@@ -33,69 +32,27 @@ void main() {
     ),
   );
 }
-
+ 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    print("🔥 initState triggered");
-    initPushNotification();
-  }
-
-  // REQUEST PERMISSION + GET TOKEN + FOREGROUND HANDLING
-  void initPushNotification() async {
-     print("🔥 initPushNotification called");
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-    // Permission for iOS & Android 13+
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      sound: true,
-      badge: true,
-    );
-
-    print(" 🔥  NOTIFICATION PERMISSION: ${settings.authorizationStatus}");
-
-    // Get FCM Token
-    String? token = await messaging.getToken();
-    print(" 🔥  FCM DEVICE TOKEN: $token");
-
-    // Foreground message listener
-    FirebaseMessaging.onMessage.listen((message) {
-      print("🔥 FOREGROUND MESSAGE: ${message.notification?.title}");
-    });
-
-    // When app is opened from notification
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      print("🔥 OPENED APP FROM NOTIFICATION: ${message.notification?.title}");
-    });
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/signin',
+      initialRoute: '/splash',
       routes: {
         '/nav': (_) => const BottomNav(),
         '/splash': (_) => const SplashScreen(),
         "/onboarding": (_) => const OnboardingScreen(),
-
         "/login": (_) => LoginScreen(),
         "/forgot": (_) => ForgotPasswordScreen(),
         "/reset": (_) => ResetPasswordScreen(),
         '/home': (_) => HomeScreen(),
-        '/leaves': (_) => const LeavesScreen(role: "manager"),
-        '/leave-request': (_) => const LeaveRequestScreen(),
+        '/leaves': (_) => const LeaveScreen(),
         "/notifications": (_) => const NotificationsScreen(),
       },
     );
   }
 }
+ 

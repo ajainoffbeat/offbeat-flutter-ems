@@ -9,6 +9,9 @@ class AppThemeData {
   static const Color primary500 = Color(0xFF3374FF); 
   static const Color primary600 = Color(0xFF1B54CC);
 
+  static const background = Color(0xFFF5F6FA);
+  static const textPrimary = Color(0xFF1F2937);
+  static const textSecondary = Color(0xFF6B7280);
 
   static const Color surface       = Color(0xFFFFFFFF); 
   static const Color surfaceLight  = Color(0xFFF8F9FC); 
