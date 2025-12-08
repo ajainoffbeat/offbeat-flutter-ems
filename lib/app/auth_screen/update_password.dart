@@ -1,4 +1,3 @@
-import 'package:ems_offbeat/app/custom_input.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +11,7 @@ class UpdatePasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppThemeData.surface,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
@@ -49,32 +48,92 @@ class UpdatePasswordScreen extends StatelessWidget {
                     // Old Password
                     const TitleText(text: "Old Password"),
                     const SizedBox(height: 6),
-                    CustomInput(
-                      hint: "Old Password",
-                      controller: newPassCtrl,
-                      isPassword: true,
-                    ),
+                      TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Old Password",
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: const Icon(Icons.visibility_off),
+                 filled: true, // enable background color
+                  fillColor: AppThemeData.grey100, // soft grey
+
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none, // ⬅ removes border
+                  ),
+
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
+                  ),
+                ),
+              ),
 
                     const SizedBox(height: 20),
                     // New Password
                     const TitleText(text: "New Password"),
                     const SizedBox(height: 6),
-                    CustomInput(
-                      hint: "New Password",
-                      controller: newPassCtrl,
-                      isPassword: true,
-                    ),
+                      TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "New Password",
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: const Icon(Icons.visibility_off),
+                 filled: true, // enable background color
+                  fillColor: AppThemeData.grey100, // soft grey
+
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none, // ⬅ removes border
+                  ),
+
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
+                  ),
+                ),
+              ),
 
                     const SizedBox(height: 20),
 
                     // Confirm Password
                     const TitleText(text: "Confirm Password"),
                     const SizedBox(height: 6),
-                    CustomInput(
-                      hint: "Confirm New Password",
-                      controller: confirmPassCtrl,
-                      isPassword: true,
-                    ),
+                      TextField(
+                obscureText: true,
+                decoration: InputDecoration(
+                  hintText: "Confirm New Password",
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  suffixIcon: const Icon(Icons.visibility_off),
+                 filled: true, // enable background color
+                  fillColor: AppThemeData.grey100, // soft grey
+
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none, // ⬅ removes border
+                  ),
+
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
+                  ),
+                ),
+              ),
 
                     const SizedBox(height: 20),
                   ],
