@@ -1,4 +1,5 @@
 import 'package:ems_offbeat/theme/app_theme.dart';
+import 'package:ems_offbeat/widgets/screen_headings.dart';
 import 'package:flutter/material.dart';
 
 class LeaveApplySheet extends StatelessWidget {
@@ -25,13 +26,14 @@ class LeaveApplySheet extends StatelessWidget {
                 _dragHandle(),
                 const SizedBox(height: 20),
 
-                const Text(
-                  "Planning your great escape?",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                // const Text(
+                //   "Planning your great escape?",
+                //   style: TextStyle(
+                //     fontSize: 22,
+                //     fontWeight: FontWeight.w600,
+                //   ),
+                // ),
+                const ScreenHeading(text: "Planning your great escape?"),
 
                 const SizedBox(height: 20),
                 _formCard(),
@@ -66,15 +68,17 @@ class LeaveApplySheet extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Fill Leave Information",
-            style: TextStyle(fontWeight: FontWeight.w600),
-          ),
+          // const Text(
+          //   "Fill Leave Information",
+          //   style: TextStyle(fontWeight: FontWeight.w600),
+          // ),
+           const TitleText(text: "Fill Leave Information"),
           const SizedBox(height: 4),
-          const Text(
-            "Information about leave details",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
+          // const Text(
+          //   "Information about leave details",
+          //   style: TextStyle(fontSize: 12, color: Colors.grey),
+          // ),
+          const ScreenSubtitle(text: "Information about leave details"),
 
           const SizedBox(height: 20),
 
