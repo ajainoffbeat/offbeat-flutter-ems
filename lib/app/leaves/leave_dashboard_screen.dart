@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
 import 'package:ems_offbeat/widgets/leave_summary_card.dart';
@@ -5,21 +6,37 @@ import 'package:ems_offbeat/widgets/status_tab.dart';
 import 'package:flutter/material.dart';
 
 class LeaveScreen extends StatelessWidget {
-  const LeaveScreen({super.key});
+ 
+ 
+ void _openLeaveApplySheet(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (_) => const LeaveApplySheet(),
+  );
+}
 
+  const LeaveScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppThemeData.surface,
-        child: const Icon(Icons.add),
-        onPressed: () {},
+        backgroundColor: AppThemeData.primary500,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
+        onPressed: () {
+            _openLeaveApplySheet(context);
+        },
       ),
       body: Stack(
         children: [
-          _buildHeader(),
-          _buildContent(),
+          _buildHeader(),   
+          _buildContent(context),
         ],
       ),
     );
@@ -51,16 +68,18 @@ class LeaveScreen extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             "Submit your leave, kick back, and recharge.",
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: Color.fromARGB(179, 248, 248, 248)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
     return Positioned(
       top: 300,
+      height: screenHeight - 300,
       left: 0,
       right: 0,
       child: Container(
