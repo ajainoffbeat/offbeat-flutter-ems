@@ -1,10 +1,82 @@
-import 'package:ems_offbeat/theme/app_theme.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_subtitle.dart';
 import 'package:ems_offbeat/widgets/screen_title.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _rememberMe = false;
+  bool _isLoading = false;
+
+  /// ✅ LOGIN API CALL
+  Future<void> _login() async {
+    if (_emailController.text.isEmpty ||
+        _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email and password are required")),
+      );
+      return;
+    }
+    setState(() => _isLoading = true);
+    final url =
+        Uri.parse("http://www.offbeatsoftwaresolutions.com/api/Auth/login");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "Username": _emailController.text.trim(),
+          "password": _passwordController.text.trim(),
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      print(data.toString());
+
+      if (response.statusCode == 200) {
+        // ✅ Example: token
+        final token = data["token"];
+        print("TOKENNNNNNNNNNNNNNNNNNNN: $token");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Login successful")),
+        );
+
+        Navigator.pushReplacementNamed(context, '/leaves');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Login failed")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Something went wrong")),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +90,6 @@ class LoginScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
 
-              // Back button
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -26,7 +97,6 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // Updated header widgets
               const ScreenTitle(text: "Welcome Back! 👋"),
               const SizedBox(height: 6),
               const ScreenSubtitle(
@@ -35,79 +105,47 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Email Field
+              // ✅ EMAIL
               TextField(
-                decoration: InputDecoration(
-                  hintText: "Email",
-                  prefixIcon: const Icon(Icons.email_outlined),
-
-                  filled: true, // enable background color
-                  fillColor: AppThemeData.grey100, // soft grey
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none, // ⬅ removes border
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
-                  ),
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: _inputDecoration(
+                  hint: "Email",
+                  icon: Icons.email_outlined,
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // Password Field
+              // ✅ PASSWORD
               TextField(
+                controller: _passwordController,
                 obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "Password",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: const Icon(Icons.visibility_off),
-                 filled: true, // enable background color
-                  fillColor: AppThemeData.grey100, // soft grey
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none, // ⬅ removes border
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
-                  ),
+                decoration: _inputDecoration(
+                  hint: "Password",
+                  icon: Icons.lock_outline,
+                  suffix: Icons.visibility_off,
                 ),
               ),
+
               const SizedBox(height: 14),
 
               Row(
                 children: [
                   Checkbox(
-                    value: false,
-                    onChanged: (v) {},
-                    // activeColor:
-                    //     AppThemeData.primary500, // ⬅ fill color when checked
-                    checkColor: Colors.white, // ⬅ tick color
+                    value: _rememberMe,
+                    onChanged: (v) {
+                      setState(() => _rememberMe = v ?? false);
+                    },
+                    checkColor: Colors.white,
                     side: BorderSide(
                       color: AppThemeData.primary500,
                       width: 2,
-                    ), // ⬅ optional: border color when unchecked
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4), // ⬅ curve amount
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-
                   const Text("Remember me"),
                   const Spacer(),
                   TextButton(
@@ -115,8 +153,8 @@ class LoginScreen extends StatelessWidget {
                     child: const Text(
                       "Forgot Password?",
                       style: TextStyle(
-                        fontSize: 15,
                         color: AppThemeData.primary500,
+                        fontSize: 15,
                       ),
                     ),
                   ),
@@ -124,9 +162,7 @@ class LoginScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
-
               const Center(child: Text("or")),
-
               const SizedBox(height: 20),
 
               _socialButton(
@@ -145,28 +181,26 @@ class LoginScreen extends StatelessWidget {
 
               const SizedBox(height: 30),
 
-              // Login button
+              // ✅ LOGIN BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppThemeData.primary500,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 80,
-                      vertical: 15,
-                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/leaves');  
-                  },
-                  child: const Text(
-                    "Log in",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Log in",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
 
@@ -178,7 +212,31 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // Social Button Widget
+  /// ✅ COMMON INPUT DECORATION
+  InputDecoration _inputDecoration({
+    required String hint,
+    required IconData icon,
+    IconData? suffix,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      suffixIcon: suffix != null ? Icon(suffix) : null,
+      filled: true,
+      fillColor: AppThemeData.grey100,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide:
+            const BorderSide(color: AppThemeData.primary400, width: 2),
+      ),
+    );
+  }
+
+  /// ✅ SOCIAL BUTTON
   Widget _socialButton({required IconData icon, required String text}) {
     return Container(
       height: 52,
@@ -186,11 +244,10 @@ class LoginScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: Colors.grey.shade300),
       ),
-
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 24),
+          Icon(icon),
           const SizedBox(width: 12),
           Text(text, style: const TextStyle(fontSize: 15)),
         ],
