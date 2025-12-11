@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -51,7 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         // ✅ Example: token
         final token = data["token"];
-        print("TOKENNNNNNNNNNNNNNNNNNNN: $token");
+        await TokenStorage.saveToken(token);
+        // print("TOKENNNNNNNNNNNNNNNNNNNN: $token");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? "Login successful")),
         );

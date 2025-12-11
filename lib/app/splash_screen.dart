@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:ems_offbeat/utils/token_storage.dart'; // ✅ ADD THIS
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -31,13 +32,24 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
+    _checkLogin();
+  }
 
-    // Auto navigation
-    Timer(const Duration(seconds: 5), () {
-      // Navigator.pushReplacementNamed(context, '/signin');
-      Navigator.pushReplacementNamed(context, '/onboarding');
+  Future<void> _checkLogin() async {
+    await Future.delayed(const Duration(seconds: 3)); // keep splash visible
 
-    });
+    final token = await TokenStorage.getToken();
+    // print("TOKENNNNNNNNNNNNNNNNNNNN: $token");
+
+    if (!mounted) return;
+
+    if (token != null && token.isNotEmpty) {
+      // ✅ User already logged in
+      Navigator.pushReplacementNamed(context, '/leaves');
+    } else {
+      // ✅ New / Logged out user
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override
@@ -53,9 +65,9 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppThemeData.primary500, // NEW COLOR #6e61ff
+              AppThemeData.primary500,
               Colors.white,
-              Color.fromARGB(186, 216, 233, 255), // soft grey
+              Color.fromARGB(186, 216, 233, 255),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -67,16 +79,12 @@ class _SplashScreenState extends State<SplashScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Logo
                 SizedBox(
                   height: 300,
                   width: 300,
                   child: Image.asset('assets/images/logo.png'),
                 ),
-
                 const SizedBox(height: 40),
-
-                // White SpinKit Loader
                 const SpinKitCircle(
                   color: AppThemeData.primary500,
                   size: 50.0,
