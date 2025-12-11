@@ -1,21 +1,62 @@
 import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
+import 'package:ems_offbeat/model/leaveType.dart';
+import 'package:ems_offbeat/services/leave_service.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
+import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
+import 'package:ems_offbeat/widgets/leave_item_card.dart';
 import 'package:ems_offbeat/widgets/leave_summary_card.dart';
 import 'package:ems_offbeat/widgets/status_tab.dart';
 import 'package:flutter/material.dart';
 
-class LeaveScreen extends StatelessWidget {
+class LeaveScreen extends StatefulWidget {
   const LeaveScreen({super.key});
+
+  @override
+  State<LeaveScreen> createState() => _LeaveScreenState();
   
-  void _openLeaveApplySheet(BuildContext context) {
+}
+
+class _LeaveScreenState extends State<LeaveScreen> {
+  late Future<List<dynamic>> _leavesFuture;
+  List<LeaveType> allLeaves = []; 
+  List<LeaveType> filteredLeaves = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadLeaves();
+    _leavesFuture = LeaveService.getMyLeaves(); // ✅ API CALL
+  }
+
+  void _openLeaveApplySheet() async {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const LeaveApplySheet(),
     );
+    //     await TokenStorage.clearToken();
+    // Navigator.pushReplacementNamed(context, '/login');
   }
+
+  String _currentFilter = "Pending";
+
+void loadLeaves() async {
+print("ALL LEAVES:fsdgfdgfdgfdddddddddddddddddddddddddddddddddd");
+  allLeaves = await fetchLeaveTypes(); // your API call
+  print("ALL LEAVES: $allLeaves");
+  applyFilter();
+}
+
+void applyFilter() {
+  setState(() {
+    filteredLeaves = allLeaves.where((leave) {
+      return leave.IsApproved == _currentFilter; // "Pending", "Approved", "Rejected"
+    }).toList();
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -23,134 +64,109 @@ class LeaveScreen extends StatelessWidget {
       backgroundColor: AppThemeData.primary500,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppThemeData.primary500,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-        onPressed: () {
-          _openLeaveApplySheet(context);
-        },
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: _openLeaveApplySheet,
       ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              children: [
-                _buildHeader(constraints),
-                _buildContent(context, constraints),
-              ],
-            );
-          },
-        ),
-      ),
+      body: Stack(children: [_buildHeader(), _buildContent(context)]),
     );
   }
 
-  Widget _buildHeader(BoxConstraints constraints) {
-    final screenWidth = constraints.maxWidth;
-    final screenHeight = constraints.maxHeight;
-    
-    // Responsive font sizes
-    final titleFontSize = screenWidth < 360 ? 24.0 : (screenWidth < 400 ? 26.0 : 30.0);
-    final subtitleFontSize = screenWidth < 360 ? 13.0 : 14.0;
-    
-    // Responsive padding
-    final horizontalPadding = screenWidth < 360 ? 20.0 : (screenWidth < 400 ? 24.0 : 30.0);
-    final topPadding = screenHeight < 600 ? 60.0 : (screenHeight < 700 ? 80.0 : 100.0);
-    
+  // ───────── HEADER ─────────
+  Widget _buildHeader() {
     return Container(
-      height: double.infinity,
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppThemeData.primary500, AppThemeData.primary100],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      padding: EdgeInsets.fromLTRB(horizontalPadding, topPadding, 24, 20),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(30, 100, 24, 20),
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Ready to escape the\nspreadsheet jungle?",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: titleFontSize,
-              fontWeight: FontWeight.w600,
-              height: 1.2,
-            ),
+            style: TextStyle(color: Colors.white, fontSize: 30),
           ),
           const SizedBox(height: 8),
           Text(
             "Submit your leave, kick back, and recharge.",
-            style: TextStyle(
-              color: const Color.fromARGB(179, 248, 248, 248),
-              fontSize: subtitleFontSize,
-            ),
+            style: TextStyle(color: Colors.white70),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, BoxConstraints constraints) {
-    final screenHeight = constraints.maxHeight;
-    final screenWidth = constraints.maxWidth;
-    
-    // Responsive top position
-    final topPosition = screenHeight < 600 ? screenHeight * 0.35 : 
-                       (screenHeight < 700 ? screenHeight * 0.38 : 
-                       (screenHeight < 800 ? screenHeight * 0.40 : 300.0));
-    
-    // Responsive padding
-    final contentPadding = screenWidth < 360 ? 16.0 : 20.0;
-    
-    // Responsive spacing
-    final cardSpacing = screenWidth < 360 ? 8.0 : 12.0;
-    final sectionSpacing = screenHeight < 600 ? 20.0 : 30.0;
-    
-    return Positioned(
-      top: topPosition,
-      height: screenHeight - topPosition,
-      left: 0,
-      right: 0,
+  // ───────── CONTENT ─────────
+  Widget _buildContent(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomCenter,
       child: Container(
-        padding: EdgeInsets.all(contentPadding),
+        height: MediaQuery.of(context).size.height * 0.70, // bottom card height
+        width: double.infinity, // ✅ FIX width issue
+        padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: LeaveSummaryCard(
-                      title: "Annual Leave Remaining",
-                      value: "18",
-                      icon: Icons.event_available,
-                    ),
-                  ),
-                  SizedBox(width: cardSpacing),
-                  Expanded(
-                    child: LeaveSummaryCard(
-                      title: "Used Leave Balance",
-                      value: "6",
-                      icon: Icons.event_busy,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: sectionSpacing),
-              const StatusTab(),
-              SizedBox(height: sectionSpacing),
-              const EmptyState(),
-            ],
-          ),
+        child: Column(
+          children: [
+            Row(
+              children: const [
+                LeaveSummaryCard(
+                  title: "Annual Leave Remaining",
+                  value: "18",
+                  icon: Icons.event_available,
+                ),
+                SizedBox(width: 12),
+                LeaveSummaryCard(
+                  title: "Used Leave Balance",
+                  value: "6",
+                  icon: Icons.event_busy,
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            StatusTab(
+              onStatusChanged: (val) {
+                setState(() {
+                  _currentFilter = val;
+                });
+                applyFilter();
+              },
+            ),
+            const SizedBox(height: 30),
+
+            Expanded(child: _buildLeaveList()),
+          ],
         ),
       ),
     );
   }
+
+  // ───────── LEAVE LIST ─────────
+  Widget _buildLeaveList() {
+    return FutureBuilder<List<dynamic>>(
+      future: _leavesFuture,
+
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return const Center(child: Text("Failed to load leaves"));
+        }
+        final leaves = snapshot.data ?? [];
+        if (leaves.isEmpty) {
+          return const Center(child: EmptyState());
+        }
+
+        return ListView.builder(
+          itemCount: leaves.length,
+          itemBuilder: (context, index) {
+            return LeaveItemCard(leave: leaves[index]);
+          },
+        );
+      },
+    );
+  }
 }
+
+
+
