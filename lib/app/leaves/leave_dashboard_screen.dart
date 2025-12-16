@@ -13,15 +13,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class LeaveScreen extends ConsumerWidget {
   const LeaveScreen({super.key});
 
-  void _openLeaveApplySheet(BuildContext context, WidgetRef ref) async{
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const LeaveApplySheet(),
-    );
-    // TokenStorage.clearToken();
-    // Navigator.pushReplacementNamed(context, '/login');  
+  void _openLeaveApplySheet(BuildContext context, WidgetRef ref) async {
+    // showModalBottomSheet(
+    //   context: context,
+    //   isScrollControlled: true,
+    //   backgroundColor: Colors.transparent,
+    //   builder: (_) => const LeaveApplySheet(),
+    // );
+    TokenStorage.clearToken();
+    Navigator.pushReplacementNamed(context, '/login');
   }
 
   @override
@@ -30,16 +30,19 @@ class LeaveScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppThemeData.primary500,
-        child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () => _openLeaveApplySheet(context, ref),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 90,
+        ), // 👈 adjust to match tab height
+        child: FloatingActionButton(
+          backgroundColor: AppThemeData.primary500,
+          child: const Icon(Icons.add, color: Colors.white),
+          onPressed: () => _openLeaveApplySheet(context, ref),
+        ),
       ),
+
       body: Stack(
-        children: [
-          _buildHeader(),
-          _buildContent(context, ref, leaveState),
-        ],
+        children: [_buildHeader(), _buildContent(context, ref, leaveState)],
       ),
     );
   }

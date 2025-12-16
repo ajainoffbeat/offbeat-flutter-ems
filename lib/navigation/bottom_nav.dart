@@ -1,6 +1,6 @@
 import 'package:ems_offbeat/navigation/app_top_bar.dart';
 import 'package:flutter/material.dart';
-import '../app/home_screen.dart';
+import '../app/home/home_screen.dart';
 
 
 class BottomNav extends StatefulWidget {

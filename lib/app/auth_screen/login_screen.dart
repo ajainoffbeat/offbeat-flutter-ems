@@ -31,7 +31,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
 
         if (next.success) {
-          Navigator.pushReplacementNamed(context, '/leaves');
+          Navigator.pushReplacementNamed(context, '/home');
         }
       }
     });

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/auth_screen/login_screen.dart';
 import 'app/onboarding_screens/onboarding_screen.dart';
 import 'app/splash_screen.dart';
-import 'app/home_screen.dart';
+import 'app/home/home_screen.dart';
 
  
 void main() {

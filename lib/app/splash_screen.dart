@@ -45,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (token != null && token.isNotEmpty) {
       // ✅ User already logged in
-      Navigator.pushReplacementNamed(context, '/leaves');
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
       // ✅ New / Logged out user
       Navigator.pushReplacementNamed(context, '/login');
