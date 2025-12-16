@@ -1,87 +1,43 @@
 import 'dart:convert';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/auth_controller.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
-import 'package:flutter/material.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   bool _rememberMe = false;
-  bool _isLoading = false;
-
-  /// ✅ LOGIN API CALL
-  Future<void> _login() async {
-    if (_emailController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email and password are required")),
-      );
-      return;
-    }
-    setState(() => _isLoading = true);
-    final url =
-        Uri.parse("http://www.offbeatsoftwaresolutions.com/api/Auth/login");
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "Username": _emailController.text.trim(),
-          "password": _passwordController.text.trim(),
-        }),
-      );
-
-      final data = jsonDecode(response.body);
-      print(data.toString());
-
-      if (response.statusCode == 200) {
-        // ✅ Example: token
-        final token = data["token"];
-        await TokenStorage.saveToken(token);
-        // print("TOKENNNNNNNNNNNNNNNNNNNN: $token");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Login successful")),
-        );
-
-        Navigator.pushReplacementNamed(context, '/leaves');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["message"] ?? "Login failed")),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Something went wrong")),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
+    /// LISTEN FOR SUCCESS / ERROR MESSAGES
+    ref.listen(authProvider, (prev, next) {
+      if (next.message != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.message!)),
+        );
+
+        if (next.success) {
+          Navigator.pushReplacementNamed(context, '/leaves');
+        }
+      }
+    });
+
+    final isLoading = authState.isLoading;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -92,15 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const SizedBox(height: 60),
 
-              // Back button
-              // IconButton(
-              //   onPressed: () => Navigator.pop(context),
-              //   icon: const Icon(Icons.arrow_back_ios_new),
-              // ),
-
-              // const SizedBox(height: 10),
-
-              // Updated header widgets
               const ScreenHeading(text: "Welcome Back! 👋"),
               const SizedBox(height: 6),
               const ScreenSubtitle(
@@ -108,9 +55,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 24),
-               const TitleText(text: "Email"),   // your custom bold widget
+
+              const TitleText(text: "Email"),
               const SizedBox(height: 6),
-              // Email Field
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -121,9 +68,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 16),
-                const TitleText(text: "Password"),   // your custom bold widget
+
+              const TitleText(text: "Password"),
               const SizedBox(height: 6),
-              // Password Field
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -135,16 +82,13 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
 
               const SizedBox(height: 14),
-
               Row(
                 children: [
                   Checkbox(
                     value: _rememberMe,
-                    onChanged: (v) {
-                      setState(() => _rememberMe = v ?? false);
-                    },
+                    onChanged: (v) => setState(() => _rememberMe = v ?? false),
                     checkColor: Colors.white,
-                    side: BorderSide(
+                    side: const BorderSide(
                       color: AppThemeData.primary500,
                       width: 2,
                     ),
@@ -155,9 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text("Remember me"),
                   const Spacer(),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context,"/updatePassword");
-                    },
+                    onPressed: () => Navigator.pushNamed(
+                      context,
+                      "/updatePassword",
+                    ),
                     child: const Text(
                       "Update Password",
                       style: TextStyle(
@@ -189,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 30),
 
-              // ✅ LOGIN BUTTON
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -200,11 +144,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  onPressed: _isLoading ? null : _login,
-                  child: _isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          ref.read(authProvider.notifier).login(
+                                _emailController.text.trim(),
+                                _passwordController.text.trim(),
+                              );
+                        },
+                  child: isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           "Log in",
                           style: TextStyle(color: Colors.white),
@@ -220,7 +169,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  /// ✅ COMMON INPUT DECORATION
   InputDecoration _inputDecoration({
     required String hint,
     required IconData icon,
@@ -238,13 +186,14 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: AppThemeData.primary400, width: 2),
+        borderSide: const BorderSide(
+          color: AppThemeData.primary400,
+          width: 2,
+        ),
       ),
     );
   }
 
-  /// ✅ SOCIAL BUTTON
   Widget _socialButton({required IconData icon, required String text}) {
     return Container(
       height: 52,

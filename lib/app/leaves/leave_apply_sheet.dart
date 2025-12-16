@@ -1,30 +1,29 @@
-import 'package:ems_offbeat/model/leaveType.dart';
-import 'package:ems_offbeat/services/leave_service.dart';
+// lib/app/leaves/leave_apply_sheet.dart
+import 'package:ems_offbeat/models/leaveType.dart';
+import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LeaveApplySheet extends StatefulWidget {
+class LeaveApplySheet extends ConsumerStatefulWidget {
   const LeaveApplySheet({super.key});
 
   @override
-  State<LeaveApplySheet> createState() => _LeaveApplySheetState();
+  ConsumerState<LeaveApplySheet> createState() => _LeaveApplySheetState();
 }
 
-class _LeaveApplySheetState extends State<LeaveApplySheet> {
+class _LeaveApplySheetState extends ConsumerState<LeaveApplySheet> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _startDateCtrl = TextEditingController();
   final TextEditingController _endDateCtrl = TextEditingController();
   final TextEditingController _reasonCtrl = TextEditingController();
 
-
   DateTime? _startDate;
   DateTime? _endDate;
+  LeaveType? _selectedLeaveType;
 
- List<LeaveType> _leaveTypes = [];
- LeaveType? _selectedLeaveType;
- 
   @override
   void dispose() {
     _startDateCtrl.dispose();
@@ -32,60 +31,66 @@ class _LeaveApplySheetState extends State<LeaveApplySheet> {
     _reasonCtrl.dispose();
     super.dispose();
   }
-  
-@override
-void initState() {
-  super.initState();
-  loadLeaveTypes();
-}
-void loadLeaveTypes() async {
-   _leaveTypes = await fetchLeaveTypes();
-
-  setState(() {});
-  print("Leave Types: ${_leaveTypes}");
-}
-
 
   // 📅 Date Picker
-  Future<void> _pickDate({
-    required TextEditingController controller,
-    DateTime? firstDate,
-  }) async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: firstDate ?? DateTime.now(),
-      lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppThemeData.primary500,
-            ),
+ // 📅 Date Picker
+Future<void> _pickDate({
+  required TextEditingController controller,
+  DateTime? firstDate,
+}) async {
+  final pickedDate = await showDatePicker(
+    context: context,
+    initialDate: firstDate ?? DateTime.now(), // ✅ Use firstDate as initialDate if provided
+    firstDate: firstDate ?? DateTime.now(),
+    lastDate: DateTime(2100),
+    builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.light(
+            primary: AppThemeData.primary500,
           ),
-          child: child!,
-        );
-      },
-    );
+        ),
+        child: child!,
+      );
+    },
+  );
 
-    if (pickedDate != null) {
-      setState(() {
-        controller.text =
-            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+  if (pickedDate != null) {
+    setState(() {
+      controller.text =
+          "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
 
-        if (controller == _startDateCtrl) {
-          _startDate = pickedDate;
-          _endDateCtrl.clear();
-          _endDate = null;
-        } else {
-          _endDate = pickedDate;
-        }
-      });
-    }
+      if (controller == _startDateCtrl) {
+        _startDate = pickedDate;
+        _endDateCtrl.clear();
+        _endDate = null;
+      } else {
+        _endDate = pickedDate;
+      }
+    });
   }
+}
 
   @override
   Widget build(BuildContext context) {
+    final leaveState = ref.watch(leaveProvider);
+    
+    // Listen to apply leave state changes
+    ref.listen(leaveProvider, (previous, next) {
+      if (next.applyLeaveSuccess) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.applyLeaveMessage ?? "Leave applied successfully!")),
+        );
+        ref.read(leaveProvider.notifier).resetApplyLeaveState();
+      } else if (next.applyLeaveMessage != null && !next.isApplyingLeave) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(next.applyLeaveMessage!)),
+        );
+        ref.read(leaveProvider.notifier).resetApplyLeaveState();
+      }
+    });
+
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
       maxChildSize: 0.95,
@@ -108,7 +113,7 @@ void loadLeaveTypes() async {
                   const SizedBox(height: 16),
                   _title(),
                   const SizedBox(height: 20),
-                  _formCard(),
+                  _formCard(leaveState),
                 ],
               ),
             ),
@@ -140,7 +145,7 @@ void loadLeaveTypes() async {
     );
   }
 
-  Widget _formCard() {
+  Widget _formCard(leaveState) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -152,22 +157,13 @@ void loadLeaveTypes() async {
         children: [
           const Text(
             "Fill Leave Information",
-<<<<<<< HEAD
-            style: TextStyle(fontWeight: FontWeight.w600),
-=======
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
->>>>>>> 02b98e2b02809f01394f903b8066184503966a76
           ),
           const SizedBox(height: 4),
-          // const Text(
-          //   "Information about leave details",
-          //   style: TextStyle(fontSize: 12, color: Colors.grey),
-          // ),
           const ScreenSubtitle(text: "Information about leave details"),
-
           const SizedBox(height: 20),
 
-          _leaveTypeDropdown(),
+          _leaveTypeDropdown(leaveState),
           const SizedBox(height: 16),
 
           _startDateField(),
@@ -179,7 +175,7 @@ void loadLeaveTypes() async {
           _reasonField(),
           const SizedBox(height: 24),
 
-          _submitButton(),
+          _submitButton(leaveState),
         ],
       ),
     );
@@ -187,36 +183,73 @@ void loadLeaveTypes() async {
 
   // ───────────── Form Fields ─────────────
 
-  Widget _leaveTypeDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Pick your kind of break — we don't judge",
-          style: _labelStyle(),
-        ),
-        const SizedBox(height: 6),
-DropdownButtonFormField<LeaveType>(
-  value: _selectedLeaveType,
-  decoration: _inputDecoration("Select Type"),
-  items: _leaveTypes.map((leave) {
-    return DropdownMenuItem(
-      value: leave,
-      child: Text(leave.name),
-    );
-  }).toList(),
+  // Widget _leaveTypeDropdown(leaveState) {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       Text(
+  //         "Pick your kind of break — we don't judge",
+  //         style: _labelStyle(),
+  //       ),
+  //       const SizedBox(height: 6),
+        
+  //       leaveState.isLoadingLeaveTypes
+  //           ? const Center(child: CircularProgressIndicator())
+  //           : DropdownButtonFormField<LeaveType>(
+  //               value: _selectedLeaveType,
+  //               decoration: _inputDecoration("Select Type"),
+  //               items: leaveState.leaveTypes.map((leave) {
+  //                 return DropdownMenuItem(
+  //                   value: leave,
+  //                   child: Text(leave.name),
+  //                 );
+  //               }).toList(),
+  //               onChanged: (val) {
+  //                 setState(() {
+  //                   _selectedLeaveType = val;
+  //                 });
+  //               },
+  //               validator: (val) =>
+  //                   val == null ? "Please select leave type" : null,
+  //             ),
+  //     ],
+  //   );
+  // }
 
-  onChanged: (val) {
-    setState(() {
-      _selectedLeaveType = val;
-    });
-  },
+  Widget _leaveTypeDropdown(leaveState) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "Pick your kind of break — we don't judge",
+        style: _labelStyle(),
+      ),
+      const SizedBox(height: 6),
 
-  validator: (val) => val == null ? "Please select leave type" : null,
-)
-      ],
-    );
-  }
+      leaveState.isLoadingLeaveTypes
+          ? const Center(child: CircularProgressIndicator())
+          : DropdownButtonFormField<LeaveType>(
+              value: _selectedLeaveType,
+              decoration: _inputDecoration("Select Type"),
+              items: leaveState.leaveTypes
+                  .map<DropdownMenuItem<LeaveType>>((LeaveType leave) {
+                return DropdownMenuItem<LeaveType>(
+                  value: leave,
+                  child: Text(leave.name),
+                );
+              }).toList(),
+              onChanged: (LeaveType? val) {
+                setState(() {
+                  _selectedLeaveType = val;
+                });
+              },
+              validator: (val) =>
+                  val == null ? "Please select leave type" : null,
+            ),
+    ],
+  );
+}
+
 
   Widget _startDateField() {
     return Column(
@@ -256,16 +289,13 @@ DropdownButtonFormField<LeaveType>(
             }
             _pickDate(
               controller: _endDateCtrl,
-              firstDate: _endDateCtrl.text.isNotEmpty
-                  ? DateTime.parse(_endDateCtrl.text)
-                  : null,
+              firstDate: _startDate,
             );
           },
           decoration: _inputDecoration("End Date").copyWith(
             suffixIcon: const Icon(Icons.calendar_month),
           ),
-          validator: (val) =>
-              val!.isEmpty ? "Please select end date" : null,
+          validator: (val) => val!.isEmpty ? "Please select end date" : null,
         ),
       ],
     );
@@ -289,7 +319,7 @@ DropdownButtonFormField<LeaveType>(
     );
   }
 
-  Widget _submitButton() {
+  Widget _submitButton(leaveState) {
     return SizedBox(
       width: double.infinity,
       height: 48,
@@ -300,49 +330,49 @@ DropdownButtonFormField<LeaveType>(
             borderRadius: BorderRadius.circular(14),
           ),
         ),
-       onPressed: () async {
-  if (!_formKey.currentState!.validate()) return;
+        onPressed: leaveState.isApplyingLeave
+            ? null
+            : () async {
+                if (!_formKey.currentState!.validate()) return;
 
-  if (_selectedLeaveType == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Please select leave type")),
-    );
-    return;
-  }
+                if (_selectedLeaveType == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Please select leave type")),
+                  );
+                  return;
+                }
 
-  final success = await applyLeave(
-    employeeId: 115,             // jo user hai jika leave apply hoga
-    enteredBy:  93,             // Logged in UserId logid use 
-    leaveTypeId: _selectedLeaveType!.id,
-    leaveDateFrom: DateTime(
-      _startDate!.year,
-      _startDate!.month,
-      _startDate!.day,
-    ).toUtc().toIso8601String(),
-    leaveDateTo: DateTime(
-      _endDate!.year,
-      _endDate!.month,
-      _endDate!.day,
-    ).toUtc().toIso8601String(),
-    reason: _reasonCtrl.text,
-  );
-
-  if (success) {
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Leave applied successfully!")),
-    );
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Failed to apply leave")),
-    );
-  }
-},
-
-        child: const Text(
-          "Let's Make It Official",
-          style: TextStyle(color: Colors.white),
-        ),
+                // Call the provider method
+                await ref.read(leaveProvider.notifier).applyLeave(
+                      employeeId: 115, // Replace with actual logged-in user ID
+                      enteredBy: 93, // Replace with actual logged-in user ID
+                      leaveTypeId: _selectedLeaveType!.id,
+                      leaveDateFrom: DateTime(
+                        _startDate!.year,
+                        _startDate!.month,
+                        _startDate!.day,
+                      ).toUtc().toIso8601String(),
+                      leaveDateTo: DateTime(
+                        _endDate!.year,
+                        _endDate!.month,
+                        _endDate!.day,
+                      ).toUtc().toIso8601String(),
+                      reason: _reasonCtrl.text,
+                    );
+              },
+        child: leaveState.isApplyingLeave
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            : const Text(
+                "Let's Make It Official",
+                style: TextStyle(color: Colors.white),
+              ),
       ),
     );
   }

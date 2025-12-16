@@ -1,0 +1,95 @@
+// lib/repository/leave_repository.dart
+import 'package:http/http.dart' as http;
+import '../models/leaveType.dart';
+import '../services/leave_service.dart' as leave_service;
+
+class LeaveRepository {
+  final http.Client client;
+
+  LeaveRepository({required this.client});
+
+  Future<Map<String, dynamic>> getMyLeaves() async {
+    try {
+      final leaves = await leave_service.LeaveService.getMyLeaves();
+      
+      return {
+        "statusCode": 200,
+        "data": {
+          "leaves": leaves,
+          "message": "Leaves fetched successfully",
+        },
+      };
+    } catch (e) {
+      return {
+        "statusCode": 500,
+        "data": {
+          "message": e.toString(),
+        },
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> getLeaveTypes() async {
+    try {
+      final leaveTypes = await leave_service.fetchLeaveTypes();
+      
+      return {
+        "statusCode": 200,
+        "data": {
+          "leaveTypes": leaveTypes,
+          "message": "Leave types fetched successfully",
+        },
+      };
+    } catch (e) {
+      return {
+        "statusCode": 500,
+        "data": {
+          "message": e.toString(),
+        },
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> applyLeave({
+    required int employeeId,
+    required int enteredBy,
+    required int leaveTypeId,
+    required String leaveDateFrom,
+    required String leaveDateTo,
+    required String reason,
+  }) async {
+    try {
+      final bool success = await leave_service.applyLeave(
+        employeeId: employeeId,
+        enteredBy: enteredBy,
+        leaveTypeId: leaveTypeId,
+        leaveDateFrom: leaveDateFrom,
+        leaveDateTo: leaveDateTo,
+        reason: reason,
+      );
+
+      if (success) {
+        return {
+          "statusCode": 200,
+          "data": {
+            "message": "Leave applied successfully!",
+          },
+        };
+      } else {
+        return {
+          "statusCode": 400,
+          "data": {
+            "message": "Failed to apply leave",
+          },
+        };
+      }
+    } catch (e) {
+      return {
+        "statusCode": 500,
+        "data": {
+          "message": e.toString(),
+        },
+      };
+    }
+  }
+} 

@@ -1,6 +1,6 @@
+// lib/app/leaves/leave_screen.dart
 import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
-import 'package:ems_offbeat/model/leaveType.dart';
-import 'package:ems_offbeat/services/leave_service.dart';
+import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
@@ -8,66 +8,39 @@ import 'package:ems_offbeat/widgets/leave_item_card.dart';
 import 'package:ems_offbeat/widgets/leave_summary_card.dart';
 import 'package:ems_offbeat/widgets/status_tab.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LeaveScreen extends StatefulWidget {
+class LeaveScreen extends ConsumerWidget {
   const LeaveScreen({super.key});
 
-  @override
-  State<LeaveScreen> createState() => _LeaveScreenState();
-  
-}
-
-class _LeaveScreenState extends State<LeaveScreen> {
-  late Future<List<dynamic>> _leavesFuture;
-  List<LeaveType> allLeaves = []; 
-  List<LeaveType> filteredLeaves = [];
-
-  @override
-  void initState() {
-    super.initState();
-    loadLeaves();
-    _leavesFuture = LeaveService.getMyLeaves(); // ✅ API CALL
-  }
-
-  void _openLeaveApplySheet() async {
+  void _openLeaveApplySheet(BuildContext context, WidgetRef ref) async{
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => const LeaveApplySheet(),
     );
-    //     await TokenStorage.clearToken();
-    // Navigator.pushReplacementNamed(context, '/login');
+    // TokenStorage.clearToken();
+    // Navigator.pushReplacementNamed(context, '/login');  
   }
 
-  String _currentFilter = "Pending";
-
-void loadLeaves() async {
-print("ALL LEAVES:fsdgfdgfdgfdddddddddddddddddddddddddddddddddd");
-  allLeaves = await fetchLeaveTypes(); // your API call
-  print("ALL LEAVES: $allLeaves");
-  applyFilter();
-}
-
-void applyFilter() {
-  setState(() {
-    filteredLeaves = allLeaves.where((leave) {
-      return leave.IsApproved == _currentFilter; // "Pending", "Approved", "Rejected"
-    }).toList();
-  });
-}
-
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final leaveState = ref.watch(leaveProvider);
+
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppThemeData.primary500,
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: _openLeaveApplySheet,
+        onPressed: () => _openLeaveApplySheet(context, ref),
       ),
-      body: Stack(children: [_buildHeader(), _buildContent(context)]),
+      body: Stack(
+        children: [
+          _buildHeader(),
+          _buildContent(context, ref, leaveState),
+        ],
+      ),
     );
   }
 
@@ -82,7 +55,7 @@ void applyFilter() {
             "Ready to escape the\nspreadsheet jungle?",
             style: TextStyle(color: Colors.white, fontSize: 30),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             "Submit your leave, kick back, and recharge.",
             style: TextStyle(color: Colors.white70),
@@ -93,12 +66,12 @@ void applyFilter() {
   }
 
   // ───────── CONTENT ─────────
-  Widget _buildContent(BuildContext context) {
+  Widget _buildContent(BuildContext context, WidgetRef ref, leaveState) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.70, // bottom card height
-        width: double.infinity, // ✅ FIX width issue
+        height: MediaQuery.of(context).size.height * 0.70,
+        width: double.infinity,
         padding: const EdgeInsets.all(20),
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -107,16 +80,16 @@ void applyFilter() {
         child: Column(
           children: [
             Row(
-              children: const [
+              children: [
                 LeaveSummaryCard(
                   title: "Annual Leave Remaining",
-                  value: "18",
+                  value: "${leaveState.annualLeaveRemaining}",
                   icon: Icons.event_available,
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 LeaveSummaryCard(
                   title: "Used Leave Balance",
-                  value: "6",
+                  value: "${leaveState.usedLeaveBalance}",
                   icon: Icons.event_busy,
                 ),
               ],
@@ -124,15 +97,11 @@ void applyFilter() {
             const SizedBox(height: 30),
             StatusTab(
               onStatusChanged: (val) {
-                setState(() {
-                  _currentFilter = val;
-                });
-                applyFilter();
+                ref.read(leaveProvider.notifier).setFilter(val);
               },
             ),
             const SizedBox(height: 30),
-
-            Expanded(child: _buildLeaveList()),
+            Expanded(child: _buildLeaveList(ref, leaveState)),
           ],
         ),
       ),
@@ -140,33 +109,47 @@ void applyFilter() {
   }
 
   // ───────── LEAVE LIST ─────────
-  Widget _buildLeaveList() {
-    return FutureBuilder<List<dynamic>>(
-      future: _leavesFuture,
+  Widget _buildLeaveList(WidgetRef ref, leaveState) {
+    if (leaveState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    if (leaveState.errorMessage != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              leaveState.errorMessage!,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                ref.read(leaveProvider.notifier).refresh();
+              },
+              child: const Text("Retry"),
+            ),
+          ],
+        ),
+      );
+    }
 
-        if (snapshot.hasError) {
-          return const Center(child: Text("Failed to load leaves"));
-        }
-        final leaves = snapshot.data ?? [];
-        if (leaves.isEmpty) {
-          return const Center(child: EmptyState());
-        }
+    final leaves = leaveState.filteredLeaves;
 
-        return ListView.builder(
-          itemCount: leaves.length,
-          itemBuilder: (context, index) {
-            return LeaveItemCard(leave: leaves[index]);
-          },
-        );
-      },
+    if (leaves.isEmpty) {
+      return const Center(child: EmptyState());
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => ref.read(leaveProvider.notifier).refresh(),
+      child: ListView.builder(
+        itemCount: leaves.length,
+        itemBuilder: (context, index) {
+          return LeaveItemCard(leave: leaves[index]);
+        },
+      ),
     );
   }
 }
-
-
-
