@@ -14,14 +14,13 @@ class LeaveScreen extends ConsumerWidget {
   const LeaveScreen({super.key});
 
   void _openLeaveApplySheet(BuildContext context, WidgetRef ref) async {
-    // showModalBottomSheet(
-    //   context: context,
-    //   isScrollControlled: true,
-    //   backgroundColor: Colors.transparent,
-    //   builder: (_) => const LeaveApplySheet(),
-    // );
-    TokenStorage.clearToken();
-    Navigator.pushReplacementNamed(context, '/login');
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const LeaveApplySheet(),
+    );
+
   }
 
   @override
