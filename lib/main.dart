@@ -1,4 +1,5 @@
 import 'package:ems_offbeat/app/auth_screen/update_password.dart';
+import 'package:ems_offbeat/app/settings/settings_screen.dart';
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
 import 'package:ems_offbeat/app/leaves/leave_dashboard_screen.dart';
 import 'package:ems_offbeat/app/notification_screen/notification.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         '/home': (_) => HomeScreen(),
         '/leaves': (_) => const LeaveScreen(),
         "/notifications": (_) => const NotificationsScreen(),
+        '/settings': (_) => const SettingsScreen(),
       },
     );
   }
