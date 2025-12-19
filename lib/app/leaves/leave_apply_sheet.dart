@@ -344,8 +344,8 @@ Future<void> _pickDate({
 
                 // Call the provider method
                 await ref.read(leaveProvider.notifier).applyLeave(
-                      employeeId: 115, // Replace with actual logged-in user ID
-                      enteredBy: 93, // Replace with actual logged-in user ID
+                      // employeeId: 115, 
+                      // enteredBy: 93,
                       leaveTypeId: _selectedLeaveType!.id,
                       leaveDateFrom: DateTime(
                         _startDate!.year,

@@ -1,4 +1,4 @@
-import 'package:ems_offbeat/app/auth_screen/update_password.dart';
+import 'package:ems_offbeat/app/settings/update_password.dart';
 import 'package:ems_offbeat/app/settings/settings_screen.dart';
 import 'package:ems_offbeat/navigation/bottom_nav.dart';
 import 'package:ems_offbeat/app/leaves/leave_dashboard_screen.dart';

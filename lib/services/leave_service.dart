@@ -83,8 +83,8 @@ Future<List<LeaveType>> fetchLeaveTypes() async {
 }
 
 Future<bool> applyLeave({
-  required int employeeId,
-  required int enteredBy,
+  // required int employeeId,
+  // required int enteredBy,
   required int leaveTypeId,
   required String leaveDateFrom,
   required String leaveDateTo,
@@ -93,10 +93,15 @@ Future<bool> applyLeave({
   print("🟢 applyLeave called");
   
   final url = Uri.parse("http://offbeatsoftwaresolutions.com/api/Leave/apply");
+  
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  final employeeId = JwtHelper.getEmployeeId(token);
 
-  final body = jsonEncode({
+    final body = jsonEncode({
     "EmployeeID": employeeId,
-    "EnteredBy": enteredBy,
+    "EnteredBy": employeeId,
+    // "EnteredBy": enteredBy,
     "LeaveTypeID": leaveTypeId,
     "LeaveDateFrom": leaveDateFrom,
     "LeaveDateTo": leaveDateTo,
@@ -104,10 +109,7 @@ Future<bool> applyLeave({
   });
   
   print("🟢 API Body: $body");
-  
-  final token = await TokenStorage.getToken();
-  if (token == null) throw Exception("Token not found");
-  
+  // print("data=============>: $data");
   final response = await http.post(
     url,
     headers: {

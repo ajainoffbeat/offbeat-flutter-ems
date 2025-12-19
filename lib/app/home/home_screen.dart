@@ -18,7 +18,7 @@ class HomeScreen extends StatelessWidget {
           FloatingBottomTabs(
             currentIndex: 0,
             onDashboardTap: () {
-              Navigator.pushNamed(context,'/settings');
+              Navigator.pushNamed(context,'/home');
             },
             onSettingsTap: () {
               Navigator.pushNamed(context, '/settings');

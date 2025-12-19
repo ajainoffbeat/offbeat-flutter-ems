@@ -170,8 +170,8 @@ void applyFilter() {
 
   /// Apply Leave
   Future<void> applyLeave({
-    required int employeeId,
-    required int enteredBy,
+    // required int employeeId,
+    // required int enteredBy,
     required int leaveTypeId,
     required String leaveDateFrom,
     required String leaveDateTo,
@@ -187,8 +187,8 @@ void applyFilter() {
     try {
       final repo = ref.read(leaveRepositoryProvider);
       final result = await repo.applyLeave(
-        employeeId: employeeId,
-        enteredBy: enteredBy,
+        // employeeId: employeeId,
+        // enteredBy: enteredBy,
         leaveTypeId: leaveTypeId,
         leaveDateFrom: leaveDateFrom,
         leaveDateTo: leaveDateTo,

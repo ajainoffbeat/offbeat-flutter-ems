@@ -51,8 +51,8 @@ class LeaveRepository {
   }
 
   Future<Map<String, dynamic>> applyLeave({
-    required int employeeId,
-    required int enteredBy,
+    // required int employeeId,
+    // required int enteredBy,
     required int leaveTypeId,
     required String leaveDateFrom,
     required String leaveDateTo,
@@ -60,8 +60,8 @@ class LeaveRepository {
   }) async {
     try {
       final bool success = await leave_service.applyLeave(
-        employeeId: employeeId,
-        enteredBy: enteredBy,
+        // employeeId: employeeId,
+        // enteredBy: enteredBy,
         leaveTypeId: leaveTypeId,
         leaveDateFrom: leaveDateFrom,
         leaveDateTo: leaveDateTo,
