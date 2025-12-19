@@ -1,7 +1,7 @@
 // lib/repository/leave_repository.dart
 import 'package:http/http.dart' as http;
 import '../models/leaveType.dart';
-import '../services/leave_service.dart' as leave_service;
+import '../services/api_service.dart' as leave_service;
 
 class LeaveRepository {
   final http.Client client;

@@ -16,7 +16,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  bool _obscurePassword = true;
   bool _rememberMe = false;
 
   @override
@@ -26,9 +26,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     /// LISTEN FOR SUCCESS / ERROR MESSAGES
     ref.listen(authProvider, (prev, next) {
       if (next.message != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(next.message!)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.message!)));
 
         if (next.success) {
           Navigator.pushReplacementNamed(context, '/home');
@@ -73,12 +73,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: 6),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
-                decoration: _inputDecoration(
-                  hint: "Password",
-                  icon: Icons.lock_outline,
-                  suffix: Icons.visibility_off,
-                ),
+                obscureText: _obscurePassword,
+                decoration:
+                    _inputDecoration(
+                      hint: "Password",
+                      icon: Icons.lock_outline,
+                      suffix: _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                    ).copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
               ),
 
               const SizedBox(height: 14),
@@ -99,10 +115,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Text("Remember me"),
                   const Spacer(),
                   TextButton(
-                    onPressed: () => Navigator.pushNamed(
-                      context,
-                      "/updatePassword",
-                    ),
+                    onPressed: () =>
+                        Navigator.pushNamed(context, "/updatePassword"),
                     child: const Text(
                       "Update Password",
                       style: TextStyle(
@@ -147,7 +161,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: isLoading
                       ? null
                       : () {
-                          ref.read(authProvider.notifier).login(
+                          ref
+                              .read(authProvider.notifier)
+                              .login(
                                 _emailController.text.trim(),
                                 _passwordController.text.trim(),
                               );
@@ -186,10 +202,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(
-          color: AppThemeData.primary400,
-          width: 2,
-        ),
+        borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
       ),
     );
   }

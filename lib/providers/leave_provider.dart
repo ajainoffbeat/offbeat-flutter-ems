@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../repository/leave_repository.dart';
 import '../state/leave_state.dart';
-import '../services/leave_service.dart';
+import '../services/api_service.dart';
 
 /// PROVIDER: Leave Repository
 final leaveRepositoryProvider = Provider<LeaveRepository>((ref) {

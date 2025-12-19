@@ -1,12 +1,115 @@
+import 'package:ems_offbeat/services/api_service.dart' as UpdatePasswordService;
+import 'package:flutter/material.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
-import 'package:flutter/material.dart';
+import 'package:ems_offbeat/utils/token_storage.dart';
+import 'package:ems_offbeat/utils/jwt_helper.dart';
 
-class UpdatePasswordScreen extends StatelessWidget {
+class UpdatePasswordScreen extends StatefulWidget {
+  const UpdatePasswordScreen({super.key});
+
+  @override
+  State<UpdatePasswordScreen> createState() => _UpdatePasswordScreenState();
+}
+
+class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
+  final TextEditingController oldPassCtrl = TextEditingController();
   final TextEditingController newPassCtrl = TextEditingController();
   final TextEditingController confirmPassCtrl = TextEditingController();
 
-  UpdatePasswordScreen({super.key});
+  bool isLoading = false;
+  bool showOld = false;
+  bool showNew = false;
+  bool showConfirm = false;
+
+  @override
+  void dispose() {
+    oldPassCtrl.dispose();
+    newPassCtrl.dispose();
+    confirmPassCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updatePassword() async {
+    if (oldPassCtrl.text.isEmpty ||
+        newPassCtrl.text.isEmpty ||
+        confirmPassCtrl.text.isEmpty) {
+      _showSnack("All fields are required");
+      return;
+    }
+
+    if (newPassCtrl.text.length < 6) {
+      _showSnack("Password must be at least 6 characters");
+      return;
+    }
+
+    if (newPassCtrl.text != confirmPassCtrl.text) {
+      _showSnack("New password and confirm password do not match");
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final token = await TokenStorage.getToken();
+      if (token == null) throw Exception("Token not found");
+
+      final employeeId = JwtHelper.getEmployeeId(token);
+      final userName = "ajain@offbeatsoftwaresolutions.in";
+
+      if (employeeId == null || userName == null) {
+        throw Exception("Invalid token data");
+      }
+
+      final message = await UpdatePasswordService.updatePassword(
+        employeeId: employeeId,
+        userName: userName,
+        oldPassword: oldPassCtrl.text.trim(),
+        newPassword: newPassCtrl.text.trim(),
+      );
+
+      _showSnack(message);
+      Navigator.pop(context);
+    } catch (e) {
+      _showSnack(e.toString().replaceAll("Exception:", ""));
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _showSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  InputDecoration _inputDecoration({
+    required String hint,
+    required bool isVisible,
+    required VoidCallback toggle,
+  }) {
+    return InputDecoration(
+      hintText: hint,
+      prefixIcon: const Icon(Icons.lock_outline),
+      suffixIcon: IconButton(
+        icon: Icon(
+          isVisible ? Icons.visibility : Icons.visibility_off,
+        ),
+        onPressed: toggle,
+      ),
+      filled: true,
+      fillColor: AppThemeData.grey100,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide:
+            const BorderSide(color: AppThemeData.primary400, width: 2),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,117 +126,70 @@ class UpdatePasswordScreen extends StatelessWidget {
                   children: [
                     const SizedBox(height: 10),
 
-                    // Back button aligned properly
                     IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back,
-                          color: AppThemeData.primary500,
-                        ),
-                        onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back,
+                        color: AppThemeData.primary500,
                       ),
-                    
+                      onPressed: () => Navigator.pop(context),
+                    ),
 
                     const SizedBox(height: 10),
 
-                    // Headings
                     const ScreenHeading(text: "Update Password 🔒"),
                     const SizedBox(height: 6),
                     const ScreenSubtitle(
                       text:
-                          "Enter your new password below to continue. Choose a strong and unique password.",
+                          "Enter your current password and choose a new secure password.",
                     ),
 
                     const SizedBox(height: 30),
 
-                    // Old Password
+                    /// OLD PASSWORD
                     const TitleText(text: "Old Password"),
                     const SizedBox(height: 6),
-                      TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "Old Password",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: const Icon(Icons.visibility_off),
-                 filled: true, // enable background color
-                  fillColor: AppThemeData.grey100, // soft grey
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none, // ⬅ removes border
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
-                  ),
-                ),
-              ),
+                    TextField(
+                      controller: oldPassCtrl,
+                      obscureText: !showOld,
+                      decoration: _inputDecoration(
+                        hint: "Old Password",
+                        isVisible: showOld,
+                        toggle: () =>
+                            setState(() => showOld = !showOld),
+                      ),
+                    ),
 
                     const SizedBox(height: 20),
-                    // New Password
+
+                    /// NEW PASSWORD
                     const TitleText(text: "New Password"),
                     const SizedBox(height: 6),
-                      TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "New Password",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: const Icon(Icons.visibility_off),
-                 filled: true, // enable background color
-                  fillColor: AppThemeData.grey100, // soft grey
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none, // ⬅ removes border
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
-                  ),
-                ),
-              ),
+                    TextField(
+                      controller: newPassCtrl,
+                      obscureText: !showNew,
+                      decoration: _inputDecoration(
+                        hint: "New Password",
+                        isVisible: showNew,
+                        toggle: () =>
+                            setState(() => showNew = !showNew),
+                      ),
+                    ),
 
                     const SizedBox(height: 20),
 
-                    // Confirm Password
+                    /// CONFIRM PASSWORD
                     const TitleText(text: "Confirm Password"),
                     const SizedBox(height: 6),
-                      TextField(
-                obscureText: true,
-                decoration: InputDecoration(
-                  hintText: "Confirm New Password",
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: const Icon(Icons.visibility_off),
-                 filled: true, // enable background color
-                  fillColor: AppThemeData.grey100, // soft grey
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none, // ⬅ removes border
-                  ),
-
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide.none,
-                  ),
-
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
-                  ),
-                ),
-              ),
+                    TextField(
+                      controller: confirmPassCtrl,
+                      obscureText: !showConfirm,
+                      decoration: _inputDecoration(
+                        hint: "Confirm New Password",
+                        isVisible: showConfirm,
+                        toggle: () =>
+                            setState(() => showConfirm = !showConfirm),
+                      ),
+                    ),
 
                     const SizedBox(height: 20),
                   ],
@@ -141,9 +197,10 @@ class UpdatePasswordScreen extends StatelessWidget {
               ),
             ),
 
-            // Bottom Fixed Button (Consistent UI)
+            /// BOTTOM BUTTON
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -154,12 +211,15 @@ class UpdatePasswordScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  onPressed: () {},
-                  child: const Text(
-                    "Reset Password",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  
+                  onPressed: isLoading ? null : _updatePassword,
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text(
+                          "Reset Password",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ),
