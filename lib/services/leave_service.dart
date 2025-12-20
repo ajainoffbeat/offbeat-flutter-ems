@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'package:ems_offbeat/constants/constant.dart';
 import 'package:ems_offbeat/models/leaveType.dart';
 import 'package:http/http.dart' as http;
 import '../utils/token_storage.dart';
@@ -20,7 +21,7 @@ class LeaveService {
     if (EmployeeID == null) throw Exception("EmployeeId missing in token");
 
     final url = Uri.parse(
-      "http://www.offbeatsoftwaresolutions.com/api/Leave/list?employeeId=$EmployeeID",
+      "${Constant.BASE_URL}/Leave/list?employeeId=$EmployeeID",
     );
     
     print("🟢 Request URL: $url");
@@ -50,8 +51,7 @@ class LeaveService {
 
 Future<List<LeaveType>> fetchLeaveTypes() async {
   print("🟢 fetchLeaveTypes called");
-  
-  final url = Uri.parse("http://offbeatsoftwaresolutions.com/api/LeaveType/get-all");
+  final url = Uri.parse("${Constant.BASE_URL}/LeaveType/get-all");
   final token = await TokenStorage.getToken();
   
   if (token == null) {
@@ -92,7 +92,7 @@ Future<bool> applyLeave({
 }) async {
   print("🟢 applyLeave called");
   
-  final url = Uri.parse("http://offbeatsoftwaresolutions.com/api/Leave/apply");
+  final url = Uri.parse("${Constant.BASE_URL}/Leave/apply");
   
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
