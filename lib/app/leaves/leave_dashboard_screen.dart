@@ -1,8 +1,6 @@
-// lib/app/leaves/leave_screen.dart
 import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
-import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
 import 'package:ems_offbeat/widgets/leave_item_card.dart';
 import 'package:ems_offbeat/widgets/leave_summary_card.dart';
@@ -10,38 +8,50 @@ import 'package:ems_offbeat/widgets/status_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class LeaveScreen extends ConsumerWidget {
+enum LeaveView { self, team }
+
+class LeaveScreen extends ConsumerStatefulWidget {
   const LeaveScreen({super.key});
 
-  void _openLeaveApplySheet(BuildContext context, WidgetRef ref) async {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const LeaveApplySheet(),
-    );
+  @override
+  ConsumerState<LeaveScreen> createState() => _LeaveScreenState();
+}
 
-  }
+class _LeaveScreenState extends ConsumerState<LeaveScreen> {
+  /// 🔐 Replace later using role from JWT
+  final bool isAdmin = true;
+
+  LeaveView _leaveView = LeaveView.self;
+  String? _selectedUser;
+
+  final List<String> teamUsers = [
+    "Amit Jain",
+    "Rahul Sharma",
+    "Neha Verma",
+  ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(leaveProvider.notifier).refresh();
+    });
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
     final leaveState = ref.watch(leaveProvider);
 
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 90,
-        ), // 👈 adjust to match tab height
-        child: FloatingActionButton(
-          backgroundColor: AppThemeData.primary500,
-          child: const Icon(Icons.add, color: Colors.white),
-          onPressed: () => _openLeaveApplySheet(context, ref),
-        ),
-      ),
 
       body: Stack(
-        children: [_buildHeader(), _buildContent(context, ref, leaveState)],
+        children: [
+          _buildHeader(),
+          _buildContent(context, leaveState),
+        ],
       ),
     );
   }
@@ -49,18 +59,22 @@ class LeaveScreen extends ConsumerWidget {
   // ───────── HEADER ─────────
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(30, 100, 24, 20),
+      padding: const EdgeInsets.fromLTRB(24, 100, 24, 20),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             "Ready to escape the\nspreadsheet jungle?",
-            style: TextStyle(color: Colors.white, fontSize: 30),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 8),
           Text(
             "Submit your leave, kick back, and recharge.",
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: Colors.white70, fontSize: 15),
           ),
         ],
       ),
@@ -68,50 +82,158 @@ class LeaveScreen extends ConsumerWidget {
   }
 
   // ───────── CONTENT ─────────
-  Widget _buildContent(BuildContext context, WidgetRef ref, leaveState) {
+  Widget _buildContent(BuildContext context, leaveState) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.70,
+        height: MediaQuery.of(context).size.height * 0.72,
         width: double.infinity,
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// 📊 SUMMARY
             Row(
               children: [
                 LeaveSummaryCard(
-                  title: "Annual Leave Remaining",
+                  title: "Annual Left",
                   value: "${leaveState.annualLeaveRemaining}",
                   icon: Icons.event_available,
                 ),
                 const SizedBox(width: 12),
                 LeaveSummaryCard(
-                  title: "Used Leave Balance",
+                  title: "Used",
                   value: "${leaveState.usedLeaveBalance}",
                   icon: Icons.event_busy,
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            StatusTab(
-              onStatusChanged: (val) {
-                ref.read(leaveProvider.notifier).setFilter(val);
-              },
-            ),
-            const SizedBox(height: 30),
-            Expanded(child: _buildLeaveList(ref, leaveState)),
+
+            const SizedBox(height: 20),
+
+            /// 🔐 ADMIN CONTROLS
+            if (isAdmin) ...[
+              _buildAdminTabs(),
+              const SizedBox(height: 12),
+
+              if (_leaveView == LeaveView.team) ...[
+                _buildUserDropdown(),
+                const SizedBox(height: 12),
+              ],
+            ],
+
+            /// 📌 STATUS FILTER
+            if (!(isAdmin && _leaveView == LeaveView.team))
+              StatusTab(
+                onStatusChanged: (status) {
+                  ref.read(leaveProvider.notifier).setFilter(status);
+                },
+              ),
+
+            const SizedBox(height: 16),
+            const Divider(),
+
+            /// 📃 LEAVE LIST
+            Expanded(child: _buildLeaveList(leaveState)),
           ],
         ),
       ),
     );
   }
 
+  // ───────── ADMIN TABS ─────────
+  Widget _buildAdminTabs() {
+    return Container(
+      height: 42,
+      decoration: BoxDecoration(
+        color: AppThemeData.background,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        children: [
+          _adminTab("My Leaves", LeaveView.self),
+          _adminTab("Team Leaves", LeaveView.team),
+        ],
+      ),
+    );
+  }
+
+  Widget _adminTab(String title, LeaveView view) {
+    final isSelected = _leaveView == view;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _leaveView = view;
+            _selectedUser = null;
+          });
+
+          final notifier = ref.read(leaveProvider.notifier);
+
+          /// ✅ Always Pending for Team Leaves
+          if (isAdmin && view == LeaveView.team) {
+            notifier.setFilter("Pending");
+          }
+
+          notifier.refresh();
+        },
+        child: Container(
+          alignment: Alignment.center,
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppThemeData.primary500
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black54,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ───────── TEAM USER DROPDOWN ─────────
+  Widget _buildUserDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedUser,
+      decoration: InputDecoration(
+        labelText: "Select Team Member",
+        filled: true,
+        fillColor: AppThemeData.background,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      items: teamUsers
+          .map(
+            (user) => DropdownMenuItem(
+              value: user,
+              child: Text(user),
+            ),
+          )
+          .toList(),
+      onChanged: (value) {
+        setState(() => _selectedUser = value);
+        ref.read(leaveProvider.notifier).setFilter("Pending");
+        ref.read(leaveProvider.notifier).refresh();
+      },
+    );
+  }
+
   // ───────── LEAVE LIST ─────────
-  Widget _buildLeaveList(WidgetRef ref, leaveState) {
+  Widget _buildLeaveList(leaveState) {
     if (leaveState.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -141,12 +263,15 @@ class LeaveScreen extends ConsumerWidget {
     final leaves = leaveState.filteredLeaves;
 
     if (leaves.isEmpty) {
-      return const Center(child: EmptyState());
+      return const EmptyState();
     }
 
     return RefreshIndicator(
       onRefresh: () => ref.read(leaveProvider.notifier).refresh(),
       child: ListView.builder(
+        padding: const EdgeInsets.only(
+          bottom: 140, // ✅ FAB + bottom tabs safe space
+        ),
         itemCount: leaves.length,
         itemBuilder: (context, index) {
           return LeaveItemCard(leave: leaves[index]);

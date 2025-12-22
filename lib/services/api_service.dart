@@ -7,46 +7,31 @@ import '../utils/token_storage.dart';
 import '../utils/jwt_helper.dart';
 
 class LeaveService {
-  static Future<List<dynamic>> getMyLeaves() async {
-    print("🟢 LeaveService.getMyLeaves called");
-    
-    final token = await TokenStorage.getToken();
-    print("🟢 Token: ${token != null ? 'Found' : 'Not found'}");
-    
-    if (token == null) throw Exception("Token not found");
-     
-    final EmployeeID = JwtHelper.getEmployeeId(token);
-    print("🟢 EmployeeID: $EmployeeID");
-    
-    if (EmployeeID == null) throw Exception("EmployeeId missing in token");
+static Future<Map<String, dynamic>> getMyLeaves() async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
 
-    final url = Uri.parse(
-      "${Constant.BASE_URL}/Leave/list?employeeId=$EmployeeID",
-    );
-    
-    print("🟢 Request URL: $url");
+  final employeeId = JwtHelper.getEmployeeId(token);
+  if (employeeId == null) throw Exception("EmployeeId missing");
 
-    final response = await http.get(
-      url,  
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
-    
-    print("🟢 Response Status: ${response.statusCode}");
-    print("🟢 Leaves Response: ${response.body}");
-    
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      print("🟢 Decoded data type: ${data.runtimeType}");
-      print("🟢 Data length: ${data is List ? data.length : 'Not a list'}");
-      return data;
-    } else {
-      print("🔴 API Error: ${response.statusCode} - ${response.body}");
-      throw Exception("Failed to load leaves: ${response.statusCode}");
-    }
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/list?employeeId=$employeeId",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body); // ✅ Map
+  } else {
+    throw Exception("Failed to load leaves");
   }
+}
 }
 
 Future<List<LeaveType>> fetchLeaveTypes() async {
@@ -81,6 +66,43 @@ Future<List<LeaveType>> fetchLeaveTypes() async {
     throw Exception("Failed to load leave types");
   }
 }
+
+ Future<String> updatePassword({
+    required String userId,
+    required String userName,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    final token = await TokenStorage.getToken();
+    if (token == null) {
+      throw Exception("Token not found");
+    }
+
+    final url = Uri.parse(
+      "${Constant.BASE_URL}/User/update-password/$userId",
+    );
+
+    final response = await http.put(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({
+        "userName": userName,
+        "password": oldPassword,
+        "newPassword": newPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data["message"] ?? "Password updated successfully";
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error["message"] ?? "Failed to update password");
+    }
+  }
 
 Future<bool> applyLeave({
   // required int employeeId,

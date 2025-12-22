@@ -59,4 +59,22 @@ class LeaveState {
       applyLeaveMessage: applyLeaveMessage,
     );
   }
+
+  @override
+  String toString() {
+    return 'LeaveState('
+        'isLoading: $isLoading, '
+        'myLeaves: ${myLeaves.length}, '
+        'filteredLeaves: ${filteredLeaves.length}, '
+        'currentFilter: $currentFilter, '
+        'errorMessage: $errorMessage, '
+        'leaveTypes: ${leaveTypes.length}, '
+        'isLoadingLeaveTypes: $isLoadingLeaveTypes, '
+        'annualLeaveRemaining: $annualLeaveRemaining, '
+        'usedLeaveBalance: $usedLeaveBalance, '
+        'isApplyingLeave: $isApplyingLeave, '
+        'applyLeaveSuccess: $applyLeaveSuccess, '
+        'applyLeaveMessage: $applyLeaveMessage'
+        ')';
+  }
 }

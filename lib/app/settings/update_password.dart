@@ -62,7 +62,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       }
 
       final message = await UpdatePasswordService.updatePassword(
-        employeeId: employeeId,
+        userId: employeeId,
         userName: userName,
         oldPassword: oldPassCtrl.text.trim(),
         newPassword: newPassCtrl.text.trim(),
