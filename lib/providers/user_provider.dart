@@ -20,7 +20,8 @@ class UserController extends Notifier<UserState> {
   }
 
   Future<void> loadUserProfile() async {
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    print("ruinning load function");
+        state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       final repo = ref.read(userRepositoryProvider);

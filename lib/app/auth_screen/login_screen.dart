@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_offbeat/app/auth_screen/forgot_password_screen/verify_email_screen.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,10 +116,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Text("Remember me"),
                   const Spacer(),
                   TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, "/updatePassword"),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const ForgotPasswordEmailScreen(),
+                        ),
+                      );
+                    },
                     child: const Text(
-                      "Update Password",
+                      "Forgot Password",
                       style: TextStyle(
                         color: AppThemeData.primary500,
                         fontSize: 15,

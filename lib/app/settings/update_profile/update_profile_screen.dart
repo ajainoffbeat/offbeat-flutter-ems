@@ -118,8 +118,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
 
   Widget _buildProfileImage() {
     // PRINT++++++++++++++++++
-    print(widget.user.imgurl);
-    print(widget.user.imgurl.replaceRange(7, 16, "192.168.1.11"));
+    // print(widget.user.imgurl);
+    // print(widget.user.imgurl.replaceRange(7, 16, "192.168.1.11"));
     return Stack(
       children: [
         Container(

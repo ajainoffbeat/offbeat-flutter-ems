@@ -146,3 +146,85 @@ Future<bool> applyLeave({
 
   return response.statusCode == 200 || response.statusCode == 201;
 }
+
+
+
+Future<void> sendOtpToEmail({required String email}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${Constant.BASE_URL}/forgot-password/send-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] != true) {
+        throw Exception(data['message'] ?? 'Failed to send OTP');
+      }
+    } else {
+      final data = jsonDecode(response.body);
+      throw Exception(data['message'] ?? 'Failed to send OTP');
+    }
+  } catch (e) {
+    throw Exception('Error sending OTP: ${e.toString()}');
+  }
+}
+
+/// Verify OTP entered by user
+Future<bool> verifyOtp({
+  required String email,
+  required String otp,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${Constant.BASE_URL}/forgot-password/verify-otp'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'otp': otp,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['success'] == true;
+    } else {
+      final data = jsonDecode(response.body);
+      throw Exception(data['message'] ?? 'Invalid OTP');
+    }
+  } catch (e) {
+    throw Exception('Error verifying OTP: ${e.toString()}');
+  }
+}
+
+/// Reset password with verified OTP
+Future<void> resetPassword({
+  required String email,
+  required String otp,
+  required String newPassword,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${Constant.BASE_URL}/forgot-password/reset'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'otp': otp,
+        'newPassword': newPassword,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['success'] != true) {
+        throw Exception(data['message'] ?? 'Failed to reset password');
+      }
+    } else {
+      final data = jsonDecode(response.body);
+      throw Exception(data['message'] ?? 'Failed to reset password');
+    }
+  } catch (e) {
+    throw Exception('Error resetting password: ${e.toString()}');
+  }
+}

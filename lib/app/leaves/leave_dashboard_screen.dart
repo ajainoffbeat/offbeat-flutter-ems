@@ -118,11 +118,11 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             /// 🔐 ADMIN CONTROLS
             if (isAdmin) ...[
               _buildAdminTabs(),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
 
               if (_leaveView == LeaveView.team) ...[
                 _buildUserDropdown(),
-                const SizedBox(height: 12),
+                // const SizedBox(height: 12),
               ],
             ],
 
