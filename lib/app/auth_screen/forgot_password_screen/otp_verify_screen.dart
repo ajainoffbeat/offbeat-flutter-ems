@@ -277,14 +277,14 @@ class _ForgotPasswordOtpScreenState extends State<ForgotPasswordOtpScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  // onPressed: isLoading ? null : _verifyOtp,
-                    onPressed: () {
-                      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ForgotPasswordResetScreen(email:"hero@gmail.com",otp:"123456"),
-          ),
-        );},
+                  onPressed: isLoading ? null : _verifyOtp,
+        //             onPressed: () {
+        //               Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => ForgotPasswordResetScreen(email:"hero@gmail.com",otp:"123456"),
+        //   ),
+        // );},
                   child: isLoading
                       ? const CircularProgressIndicator(
                           color: Colors.white,

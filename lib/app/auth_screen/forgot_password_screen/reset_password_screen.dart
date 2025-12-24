@@ -1,3 +1,4 @@
+import 'package:ems_offbeat/app/auth_screen/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
@@ -44,20 +45,20 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
       return;
     }
 
-    if (!_hasUpperCase(newPassCtrl.text)) {
-      _showSnack("Password must contain at least one uppercase letter");
-      return;
-    }
+    // if (!_hasUpperCase(newPassCtrl.text)) {
+    //   _showSnack("Password must contain at least one uppercase letter");
+    //   return;
+    // }
 
-    if (!_hasLowerCase(newPassCtrl.text)) {
-      _showSnack("Password must contain at least one lowercase letter");
-      return;
-    }
+    // if (!_hasLowerCase(newPassCtrl.text)) {
+    //   _showSnack("Password must contain at least one lowercase letter");
+    //   return;
+    // }
 
-    if (!_hasDigit(newPassCtrl.text)) {
-      _showSnack("Password must contain at least one number");
-      return;
-    }
+    // if (!_hasDigit(newPassCtrl.text)) {
+    //   _showSnack("Password must contain at least one number");
+    //   return;
+    // }
 
     if (newPassCtrl.text != confirmPassCtrl.text) {
       _showSnack("Passwords do not match");
@@ -69,16 +70,21 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
     try {
       // Call your API to reset password
       await ForgotPasswordService.resetPassword(
-        email: widget.email,
-        otp: widget.otp,
+        userName: "",
+        email: widget.email,   
+        password:newPassCtrl.text.trim(),
         newPassword: newPassCtrl.text.trim(),
       );
 
       _showSnack("Password reset successfully");
-
+      
       // Navigate back to login screen (pop all forgot password screens)
       if (mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        // Navigator.of(context).popUntil((route) => route.isFirst);
+         Navigator.of(context).pushAndRemoveUntil(
+    MaterialPageRoute(builder: (_) => const LoginScreen()),
+    (route) => false,
+  );
       }
     } catch (e) {
       _showSnack(e.toString().replaceAll("Exception:", ""));
@@ -89,9 +95,9 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
     }
   }
 
-  bool _hasUpperCase(String value) => value.contains(RegExp(r'[A-Z]'));
-  bool _hasLowerCase(String value) => value.contains(RegExp(r'[a-z]'));
-  bool _hasDigit(String value) => value.contains(RegExp(r'[0-9]'));
+  // bool _hasUpperCase(String value) => value.contains(RegExp(r'[A-Z]'));
+  // bool _hasLowerCase(String value) => value.contains(RegExp(r'[a-z]'));
+  // bool _hasDigit(String value) => value.contains(RegExp(r'[0-9]'));
 
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -238,22 +244,22 @@ class _ForgotPasswordResetScreenState extends State<ForgotPasswordResetScreen> {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          _buildPasswordRequirement(
-                            "At least 6 characters",
-                            password.length >= 6,
-                          ),
-                          _buildPasswordRequirement(
-                            "One uppercase letter (A-Z)",
-                            _hasUpperCase(password),
-                          ),
-                          _buildPasswordRequirement(
-                            "One lowercase letter (a-z)",
-                            _hasLowerCase(password),
-                          ),
-                          _buildPasswordRequirement(
-                            "One number (0-9)",
-                            _hasDigit(password),
-                          ),
+                          // _buildPasswordRequirement(
+                          //   "At least 6 characters",
+                          //   password.length >= 6,
+                          // ),
+                          // _buildPasswordRequirement(
+                          //   "One uppercase letter (A-Z)",
+                          //   _hasUpperCase(password),
+                          // ),
+                          // _buildPasswordRequirement(
+                          //   "One lowercase letter (a-z)",
+                          //   // _hasLowerCase(password),
+                          // ),
+                          // _buildPasswordRequirement(
+                          //   "One number (0-9)",
+                          //   _hasDigit(password),
+                          // ),
                         ],
                       ),
                     ),

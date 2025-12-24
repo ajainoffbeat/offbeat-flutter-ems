@@ -148,15 +148,15 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  // onPressed: isLoading ? null : _sendOtp,
-                   onPressed: () {
-                      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ForgotPasswordOtpScreen(email: "samir@gmail.com"),
-          ),
-        );
-                    },
+                  onPressed: isLoading ? null : _sendOtp,
+        //            onPressed: () {
+        //               Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => ForgotPasswordOtpScreen(email: "samir@gmail.com"),
+        //   ),
+        // );
+        //             },
                   child: isLoading
                       ? const CircularProgressIndicator(
                           color: Colors.white,

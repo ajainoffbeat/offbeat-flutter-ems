@@ -152,20 +152,22 @@ Future<bool> applyLeave({
 Future<void> sendOtpToEmail({required String email}) async {
   try {
     final response = await http.post(
-      Uri.parse('${Constant.BASE_URL}/forgot-password/send-otp'),
+      Uri.parse('${Constant.BASE_URL}/User/reset-password/send-otp'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
-
-    if (response.statusCode == 200) {
+    // print('response ${response.body}',);
+    // print("EMAIL $email");
+    // if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data['success'] != true) {
-        throw Exception(data['message'] ?? 'Failed to send OTP');
-      }
-    } else {
-      final data = jsonDecode(response.body);
-      throw Exception(data['message'] ?? 'Failed to send OTP');
-    }
+      print("DATA $data");
+      // if (data['success'] != true) {
+      //   throw Exception(data['message'] ?? 'Failed to send OTP');
+      // }
+    // } else {
+    //   final data = jsonDecode(response.body);
+    //   throw Exception(data['message'] ?? 'Failed to send OTP');
+    // }
   } catch (e) {
     throw Exception('Error sending OTP: ${e.toString()}');
   }
@@ -177,8 +179,10 @@ Future<bool> verifyOtp({
   required String otp,
 }) async {
   try {
+    print("email otp");
+    print("$email $otp");
     final response = await http.post(
-      Uri.parse('${Constant.BASE_URL}/forgot-password/verify-otp'),
+      Uri.parse('${Constant.BASE_URL}/User/reset-password/verify'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': email,
@@ -186,13 +190,15 @@ Future<bool> verifyOtp({
       }),
     );
 
-    if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['success'] == true;
-    } else {
-      final data = jsonDecode(response.body);
-      throw Exception(data['message'] ?? 'Invalid OTP');
-    }
+      print("DATAAAAAAAAAAAA $data");
+      return true;
+    // if (data.message) {
+      // return data['success'] == true;
+    // } else {
+      // final data = jsonDecode(response.body);
+      // throw Exception(data['message'] ?? 'Invalid OTP');
+    // }
   } catch (e) {
     throw Exception('Error verifying OTP: ${e.toString()}');
   }
@@ -200,31 +206,33 @@ Future<bool> verifyOtp({
 
 /// Reset password with verified OTP
 Future<void> resetPassword({
+  required String userName,
   required String email,
-  required String otp,
+  required String password,
   required String newPassword,
 }) async {
   try {
     final response = await http.post(
-      Uri.parse('${Constant.BASE_URL}/forgot-password/reset'),
+      Uri.parse('${Constant.BASE_URL}/User/reset-password/update'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
+        'userName':userName,
         'email': email,
-        'otp': otp,
+        'password': password,
         'newPassword': newPassword,
       }),
     );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] != true) {
-        throw Exception(data['message'] ?? 'Failed to reset password');
-      }
-    } else {
-      final data = jsonDecode(response.body);
-      throw Exception(data['message'] ?? 'Failed to reset password');
-    }
+    
+    // if (response.statusCode == 200) {
+    //   final data = jsonDecode(response.body);
+    //   if (data['success'] != true) {
+    //     throw Exception(data['message'] ?? 'Failed to reset password');
+    //   }
+    // } else {
+    //   final data = jsonDecode(response.body);
+    //   throw Exception(data['message'] ?? 'Failed to reset password');
+    // }
   } catch (e) {
-    throw Exception('Error resetting password: ${e.toString()}');
+    throw Exception('${e.toString()}');
   }
 }
