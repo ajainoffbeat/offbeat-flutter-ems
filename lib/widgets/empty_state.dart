@@ -7,6 +7,7 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: const [
         Icon(Icons.inbox, size: 80, color: AppThemeData.textSecondary),
         SizedBox(height: 12),

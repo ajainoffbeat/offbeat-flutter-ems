@@ -92,9 +92,9 @@ Future<void> _pickDate({
     });
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.88,
-      maxChildSize: 0.95,
-      minChildSize: 0.7,
+      initialChildSize: 0.77,
+      maxChildSize: 1.0,
+      minChildSize: 0.70,
       builder: (context, scrollController) {
         return Container(
           padding: const EdgeInsets.all(20),
@@ -180,41 +180,6 @@ Future<void> _pickDate({
       ),
     );
   }
-
-  // ───────────── Form Fields ─────────────
-
-  // Widget _leaveTypeDropdown(leaveState) {
-  //   return Column(
-  //     crossAxisAlignment: CrossAxisAlignment.start,
-  //     children: [
-  //       Text(
-  //         "Pick your kind of break — we don't judge",
-  //         style: _labelStyle(),
-  //       ),
-  //       const SizedBox(height: 6),
-        
-  //       leaveState.isLoadingLeaveTypes
-  //           ? const Center(child: CircularProgressIndicator())
-  //           : DropdownButtonFormField<LeaveType>(
-  //               value: _selectedLeaveType,
-  //               decoration: _inputDecoration("Select Type"),
-  //               items: leaveState.leaveTypes.map((leave) {
-  //                 return DropdownMenuItem(
-  //                   value: leave,
-  //                   child: Text(leave.name),
-  //                 );
-  //               }).toList(),
-  //               onChanged: (val) {
-  //                 setState(() {
-  //                   _selectedLeaveType = val;
-  //                 });
-  //               },
-  //               validator: (val) =>
-  //                   val == null ? "Please select leave type" : null,
-  //             ),
-  //     ],
-  //   );
-  // }
 
   Widget _leaveTypeDropdown(leaveState) {
   return Column(
