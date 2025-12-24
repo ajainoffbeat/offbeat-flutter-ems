@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:ems_offbeat/utils/token_storage.dart';
 
@@ -7,39 +8,49 @@ class AuthRepository {
 
   AuthRepository({required this.client});
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
-    final url = Uri.parse(
-      "http://www.offbeatsoftwaresolutions.com/api/Auth/login",
-    );
+Future<Map<String, dynamic>> login(String email, String password) async {
+  final url = Uri.parse(
+    "http://www.offbeatsoftwaresolutions.com/api/Auth/login",
+  );
 
-    final response = await client.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "Username": email.trim(),
-        "password": password.trim(),
-      }),
-    );
+  final response = await client.post(
+    url,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: jsonEncode({
+      "Username": email.trim(),
+      "password": password.trim(),
+    }),
+  );
 
-    final data = jsonDecode(response.body);
+  final data = jsonDecode(response.body);
 
-    // Save token only if login was successful
-    if (response.statusCode == 200 && data["token"] != null) {
-      await TokenStorage.saveToken(data["token"]);
-    }
-      // ✅ CALL is-reporting API AFTER LOGIN
-      final isReporting = await _checkIsReporting();
-      print("Is reporting: $isReporting");
-      await TokenStorage.saveIsReporting(isReporting);
-      print("Is reporting saved: $isReporting");
+  if (response.statusCode == 200 && data["token"] != null) {
+    // 🔐 Save JWT
+    await TokenStorage.saveToken(data["token"]);
 
-    return {
-      "statusCode": response.statusCode,
-      "data": data,
-    };
+    // 🔥 GET FCM TOKEN
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    print("🔥 FCM TOKEN (LOGIN): $fcmToken");
+
+    // // 📤 SEND TO BACKEND
+    // if (fcmToken != null) {
+    //   await updateFcmToken(fcmToken);
+    // }
+
+    // ✅ Check reporting role
+    final isReporting = await _checkIsReporting();
+    print("Is reporting: $isReporting");
+    await TokenStorage.saveIsReporting(isReporting);
   }
+
+  return {
+    "statusCode": response.statusCode,
+    "data": data,
+  };
+}
+
 
   Future<bool> _checkIsReporting() async {
     final token = await TokenStorage.getToken();
