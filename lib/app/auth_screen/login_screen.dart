@@ -21,14 +21,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
 
+  String? _fcmToken;
+
+
   @override
-  Widget build(BuildContext context) {
-    
-   Future<void> testFcmToken() async {
-    final token = await FirebaseMessaging.instance.getToken();
-     print("🔥 FCM TOKEN: $token");
-   }
-testFcmToken();
+  void initState() {
+    super.initState();
+    Future.microtask(()async{
+        _fcmToken = await FirebaseMessaging.instance.getToken();
+    });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {  
 
 
 
@@ -183,6 +189,7 @@ testFcmToken();
                               .login(
                                 _emailController.text.trim(),
                                 _passwordController.text.trim(),
+                                _fcmToken
                               );
                         },
                   child: isLoading

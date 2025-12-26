@@ -19,7 +19,7 @@ class AuthController extends Notifier<AuthState> {
     return const AuthState();
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String email, String password, String? fcmToken) async {
     if (email.isEmpty || password.isEmpty) {
       state = state.copyWith(
         message: "Email and password are required",
@@ -32,7 +32,7 @@ class AuthController extends Notifier<AuthState> {
 
     try {
       final repo = ref.read(authRepositoryProvider);
-      final result = await repo.login(email, password);
+      final result = await repo.login(email, password,fcmToken);
 
       final code = result["statusCode"];
       final data = result["data"];
