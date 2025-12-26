@@ -236,3 +236,78 @@ Future<void> resetPassword({
     throw Exception('${e.toString()}');
   }
 }
+
+
+// Future<bool> updateProfile({
+//     required String email,
+//     required String mobileNumber,
+//     required String alternateMobileNumber,
+//     required String temporaryAddress,
+//     required String permanentAddress,
+//     required String imgBinaryBase64,
+//   }) async {
+//     final token = await TokenStorage.getToken();
+//     if (token == null) throw Exception("Token not found");
+
+//     final userId = JwtHelper.getEmployeeId(token);
+//     if (userId == null) throw Exception("UserId missing");
+
+//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
+
+//     final response = await http.post(
+//       url,
+//       headers: {
+//         "Authorization": "Bearer $token",
+//         "Content-Type": "application/json",
+//       },
+//       body: jsonEncode({
+//         "email": email,
+//         "mobileNumber": mobileNumber,
+//         "alternateMobileNumber": alternateMobileNumber,
+//         "temporaryAddress": temporaryAddress,
+//         "permanentAddress": permanentAddress,
+//         "img": imgBinaryBase64, // binary image in Base64
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else {
+//       final data = jsonDecode(response.body);
+//       throw Exception(data["message"] ?? "Failed to update profile");
+//     }
+//   }
+
+Future<bool> updateProfile(Map<String, String> payload) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+
+  final empId = JwtHelper.getEmployeeId(token);
+  if (empId == null) throw Exception("empId missing");
+
+  final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$empId");
+
+  final response = await http.post(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+    body: jsonEncode(payload),
+  );
+// print(response.body);
+// print(response.statusCode);
+  if (response.statusCode == 200) {
+    return true;
+  }
+
+  // ✅ Prevent crash when body is empty
+  if (response.body.trim().isEmpty) {
+    throw Exception("Server returned empty response");
+  }
+
+  // Decode only if body exists
+  final data = jsonDecode(response.body);
+  throw Exception(data["message"] ?? "Failed to update profile");
+}
+

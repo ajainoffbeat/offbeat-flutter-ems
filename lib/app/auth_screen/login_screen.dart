@@ -146,24 +146,24 @@ testFcmToken();
               ),
 
               const SizedBox(height: 20),
-              const Center(child: Text("or")),
-              const SizedBox(height: 20),
+              // const Center(child: Text("or")),
+              // const SizedBox(height: 20),
 
-              _socialButton(
-                icon: Icons.g_mobiledata,
-                text: "Continue with Google",
-              ),
-              const SizedBox(height: 18),
+              // _socialButton(
+              //   icon: Icons.g_mobiledata,
+              //   text: "Continue with Google",
+              // ),
+              // const SizedBox(height: 18),
 
-              _socialButton(icon: Icons.apple, text: "Continue with Apple"),
-              const SizedBox(height: 18),
+              // _socialButton(icon: Icons.apple, text: "Continue with Apple"),
+              // const SizedBox(height: 18),
 
-              _socialButton(
-                icon: Icons.facebook,
-                text: "Continue with Facebook",
-              ),
+              // _socialButton(
+              //   icon: Icons.facebook,
+              //   text: "Continue with Facebook",
+              // ),
 
-              const SizedBox(height: 30),
+              // const SizedBox(height: 30),
 
               SizedBox(
                 width: double.infinity,

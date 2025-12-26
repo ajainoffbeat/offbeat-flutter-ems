@@ -1,4 +1,7 @@
 // lib/app/profile/update_profile_screen.dart
+import 'dart:convert';
+
+import 'package:ems_offbeat/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/models/user.dart';
@@ -33,9 +36,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     _alternateMobileCtrl = TextEditingController(
       text: widget.user.alternateMobileNumber,
     );
-    _tempAddressCtrl = TextEditingController(text: widget.user.tempraryAddress);
+    _tempAddressCtrl = TextEditingController(text: widget.user.temporaryAddress);
     _permAddressCtrl = TextEditingController(
-      text: widget.user.perpanentAddress,
+      text: widget.user.permanentAddress,
     );
   }
 
@@ -52,43 +55,119 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> _handleImageEdit() async {
-    final XFile? picked = await _picker.pickImage(
-      source: ImageSource.gallery, // change to camera if needed
-      imageQuality: 80,
-    );
-
-    if (picked != null) {
-      setState(() {
-        _selectedImage = File(picked.path);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Image selected successfully")),
+Future<void> _handleImageEdit() async {
+  final ImageSource? source = await showModalBottomSheet<ImageSource>(
+    context: context,
+    backgroundColor: Colors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text("Camera"),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text("Gallery"),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+          ],
+        ),
       );
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("No image selected")));
-    }
+    },
+  );
+
+  if (source == null) return; // user dismissed the sheet
+
+  final XFile? picked = await _picker.pickImage(
+    source: source,
+    imageQuality: 80,
+  );
+
+  if (picked != null) {
+    setState(() {
+      _selectedImage = File(picked.path);
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Image selected successfully")),
+    );
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("No image selected")),
+    );
   }
+}
 
-  Future<void> _handleSave() async {
-    if (!_formKey.currentState!.validate()) return;
+Future<void> _handleSave() async {
+  if (!_formKey.currentState!.validate()) return;
+  setState(() => _isLoading = true);
 
-    setState(() => _isLoading = true);
+  try {
+    final Map<String, String> payload = {};
 
-    // TODO: Implement API call to update profile
-    await Future.delayed(const Duration(seconds: 2));
+    // Add only changed & non-empty fields
+    if (_emailCtrl.text.trim() != widget.user.emailAddress && _emailCtrl.text.trim().isNotEmpty) {
+      payload["email"] = _emailCtrl.text.trim();
+    }
 
-    setState(() => _isLoading = false);
+    if (_mobileCtrl.text.trim() != widget.user.mobileNumber && _mobileCtrl.text.trim().isNotEmpty) {
+      payload["mobileNumber"] = _mobileCtrl.text.trim();
+    }
 
-    if (mounted) {
+    if (_alternateMobileCtrl.text.trim() != widget.user.alternateMobileNumber && _alternateMobileCtrl.text.trim().isNotEmpty) {
+      payload["alternateMobileNumber"] = _alternateMobileCtrl.text.trim();
+    }
+
+    if (_tempAddressCtrl.text.trim() != widget.user.temporaryAddress && _tempAddressCtrl.text.trim().isNotEmpty) {
+      payload["temporaryAddress"] = _tempAddressCtrl.text.trim();
+    }
+
+    if (_permAddressCtrl.text.trim() != widget.user.permanentAddress && _permAddressCtrl.text.trim().isNotEmpty) {
+      payload["permanentAddress"] = _permAddressCtrl.text.trim();
+    }
+
+    // Add image only if selected
+    if (_selectedImage != null) {
+      final bytes = await _selectedImage!.readAsBytes();
+      payload["img"] = base64Encode(bytes);
+    }
+
+    // If nothing changed, don't call API
+    if (payload.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No changes detected")),
+        );
+      }
+      return;
+    }
+
+    final success = await updateProfile(payload);
+
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
       );
       Navigator.pop(context);
     }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll("Exception:", "").trim())),
+      );
+    }
+  } finally {
+    setState(() => _isLoading = false);
   }
+}
+
+
 
   @override
   Widget build(BuildContext context) {

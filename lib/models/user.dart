@@ -17,8 +17,8 @@ class User {
   final String employeeCode;
   final String mobileNumber;
   final String alternateMobileNumber;
-  final String perpanentAddress;
-  final String tempraryAddress;
+  final String permanentAddress;
+  final String temporaryAddress;
   final String dateOfMarraige;
   final String dateOfReleaving;
   final String panNumber;
@@ -51,8 +51,8 @@ class User {
     required this.employeeCode,
     required this.mobileNumber,
     required this.alternateMobileNumber,
-    required this.perpanentAddress,
-    required this.tempraryAddress,
+    required this.permanentAddress,
+    required this.temporaryAddress,
     required this.dateOfMarraige,
     required this.dateOfReleaving,
     required this.panNumber,
@@ -87,8 +87,8 @@ class User {
       employeeCode: json['employeeCode'] ?? '',
       mobileNumber: json['mobileNumber'] ?? '',
       alternateMobileNumber: json['alternateMobileNumber'] ?? '',
-      perpanentAddress: json['perpanentAddress'] ?? '',
-      tempraryAddress: json['tempraryAddress'] ?? '',
+      permanentAddress: json['permanentAddress'] ?? '',
+      temporaryAddress: json['temporaryAddress'] ?? '',
       dateOfMarraige: json['dateOfMarraige'] ?? '',
       dateOfReleaving: json['dateOfReleaving'] ?? '',
       panNumber: json['panNumber'] ?? '',
