@@ -1,4 +1,5 @@
 import 'package:ems_offbeat/state/user_state.dart';
+import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
@@ -171,30 +172,38 @@ Widget _profileSection(UserState userState) {
   }
 
   // ───────── LOGOUT ─────────
-  Widget _logoutButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 52,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade50,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        onPressed: () {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            '/login',
-            (route) => false,
-          );
-        },
-        child: const Text(
-          "Logout",
-          style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+Widget _logoutButton(BuildContext context) {
+  return SizedBox(
+    width: double.infinity,
+    height: 52,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red.shade100,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
-    );
-  }
+      onPressed: () async {
+        // ✅ Clear token + reporting flag
+        await TokenStorage.clearToken();
+
+        // ✅ Navigate to login & clear stack
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+          (route) => false,
+        );
+      },
+      child: const Text(
+        "Logout",
+        style: TextStyle(
+          color: Colors.red,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    ),
+  );
+}
+
 }

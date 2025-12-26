@@ -1,5 +1,6 @@
 import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
+import 'package:ems_offbeat/providers/reporting_provider.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
 import 'package:ems_offbeat/widgets/leave_item_card.dart';
@@ -18,9 +19,6 @@ class LeaveScreen extends ConsumerStatefulWidget {
 }
 
 class _LeaveScreenState extends ConsumerState<LeaveScreen> {
-  /// 🔐 Replace later using role from JWT
-  final bool isAdmin = true;
-
   LeaveView _leaveView = LeaveView.self;
   String? _selectedUser;
 
@@ -38,20 +36,25 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final leaveState = ref.watch(leaveProvider);
+    final isReportingAsync = ref.watch(isReportingProvider);
 
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
-
-      body: Stack(
-        children: [
-          _buildHeader(),
-          _buildContent(context, leaveState),
-        ],
+      body: isReportingAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) =>
+            const Center(child: Text("Something went wrong")),
+        data: (isReporting) {
+          return Stack(
+            children: [
+              _buildHeader(),
+              _buildContent(context, leaveState, isReporting),
+            ],
+          );
+        },
       ),
     );
   }
@@ -59,7 +62,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   // ───────── HEADER ─────────
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 100, 24, 20),
+      padding: const EdgeInsets.fromLTRB(24, 50, 24, 20),
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -81,64 +84,72 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     );
   }
 
-  // ───────── CONTENT ─────────
-  Widget _buildContent(BuildContext context, leaveState) {
+  // ───────── CONTENT (SCROLLABLE) ─────────
+  Widget _buildContent(
+      BuildContext context, leaveState, bool isReporting) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.72,
+        height: MediaQuery.of(context).size.height * 0.68,
         width: double.infinity,
         padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
             /// 📊 SUMMARY
-            Row(
-              children: [
-                LeaveSummaryCard(
-                  title: "Annual Left",
-                  value: "${leaveState.annualLeaveRemaining}",
-                  icon: Icons.event_available,
-                ),
-                const SizedBox(width: 12),
-                LeaveSummaryCard(
-                  title: "Used",
-                  value: "${leaveState.usedLeaveBalance}",
-                  icon: Icons.event_busy,
-                ),
-              ],
+            SliverToBoxAdapter(
+              child: Row(
+                children: [
+                  LeaveSummaryCard(
+                    title: "Annual Left",
+                    value: "${leaveState.annualLeaveRemaining}",
+                    icon: Icons.event_available,
+                  ),
+                  const SizedBox(width: 12),
+                  LeaveSummaryCard(
+                    title: "Used",
+                    value: "${leaveState.usedLeaveBalance}",
+                    icon: Icons.event_busy,
+                  ),
+                ],
+              ),
             ),
 
-            const SizedBox(height: 20),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-            /// 🔐 ADMIN CONTROLS
-            if (isAdmin) ...[
-              _buildAdminTabs(),
-              const SizedBox(height: 20),
+            /// 🔐 ADMIN TABS
+            if (isReporting)
+              SliverToBoxAdapter(child: _buildAdminTabs()),
 
-              if (_leaveView == LeaveView.team) ...[
-                _buildUserDropdown(),
-                // const SizedBox(height: 12),
-              ],
-            ],
+            if (isReporting)
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+            /// 👥 TEAM USER DROPDOWN
+            if (isReporting && _leaveView == LeaveView.team)
+              SliverToBoxAdapter(child: _buildUserDropdown()),
+
+            if (isReporting && _leaveView == LeaveView.team)
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
             /// 📌 STATUS FILTER
-            if (!(isAdmin && _leaveView == LeaveView.team))
-              StatusTab(
-                onStatusChanged: (status) {
-                  ref.read(leaveProvider.notifier).setFilter(status);
-                },
+            if (!(isReporting && _leaveView == LeaveView.team))
+              SliverToBoxAdapter(
+                child: StatusTab(
+                  onStatusChanged: (status) {
+                    ref.read(leaveProvider.notifier).setFilter(status);
+                  },
+                ),
               ),
 
-            const SizedBox(height: 16),
-            const Divider(),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            const SliverToBoxAdapter(child: Divider()),
 
             /// 📃 LEAVE LIST
-            Expanded(child: _buildLeaveList(leaveState)),
+            _buildLeaveSliverList(leaveState),
           ],
         ),
       ),
@@ -175,8 +186,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
 
           final notifier = ref.read(leaveProvider.notifier);
 
-          /// ✅ Always Pending for Team Leaves
-          if (isAdmin && view == LeaveView.team) {
+          if (view == LeaveView.team) {
             notifier.setFilter("Pending");
           }
 
@@ -186,9 +196,8 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
           alignment: Alignment.center,
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: isSelected
-                ? AppThemeData.primary500
-                : Colors.transparent,
+            color:
+                isSelected ? AppThemeData.primary500 : Colors.transparent,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Text(
@@ -232,30 +241,21 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     );
   }
 
-  // ───────── LEAVE LIST ─────────
-  Widget _buildLeaveList(leaveState) {
+  // ───────── LEAVE LIST (SLIVER) ─────────
+  Widget _buildLeaveSliverList(leaveState) {
     if (leaveState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const SliverFillRemaining(
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
 
     if (leaveState.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              leaveState.errorMessage!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                ref.read(leaveProvider.notifier).refresh();
-              },
-              child: const Text("Retry"),
-            ),
-          ],
+      return SliverFillRemaining(
+        child: Center(
+          child: Text(
+            leaveState.errorMessage!,
+            style: const TextStyle(color: Colors.red),
+          ),
         ),
       );
     }
@@ -263,19 +263,15 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     final leaves = leaveState.filteredLeaves;
 
     if (leaves.isEmpty) {
-      return const EmptyState();
+      return const SliverFillRemaining(child: EmptyState());
     }
 
-    return RefreshIndicator(
-      onRefresh: () => ref.read(leaveProvider.notifier).refresh(),
-      child: ListView.builder(
-        padding: const EdgeInsets.only(
-          bottom: 140, // ✅ FAB + bottom tabs safe space
-        ),
-        itemCount: leaves.length,
-        itemBuilder: (context, index) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
           return LeaveItemCard(leave: leaves[index]);
         },
+        childCount: leaves.length,
       ),
     );
   }

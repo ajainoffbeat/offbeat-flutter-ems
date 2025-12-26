@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ems_offbeat/app/auth_screen/forgot_password_screen/verify_email_screen.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_controller.dart';
@@ -22,8 +23,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authProvider);
+    
+   Future<void> testFcmToken() async {
+    final token = await FirebaseMessaging.instance.getToken();
+     print("🔥 FCM TOKEN: $token");
+   }
+testFcmToken();
 
+
+
+    final authState = ref.watch(authProvider);
     /// LISTEN FOR SUCCESS / ERROR MESSAGES
     ref.listen(authProvider, (prev, next) {
       if (next.message != null) {
