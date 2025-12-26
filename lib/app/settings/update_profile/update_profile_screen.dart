@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/models/user.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   final User user;
@@ -14,7 +16,7 @@ class UpdateProfileScreen extends StatefulWidget {
 
 class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   late TextEditingController _emailCtrl;
   late TextEditingController _mobileCtrl;
   late TextEditingController _alternateMobileCtrl;
@@ -28,9 +30,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     super.initState();
     _emailCtrl = TextEditingController(text: widget.user.emailAddress);
     _mobileCtrl = TextEditingController(text: widget.user.mobileNumber);
-    _alternateMobileCtrl = TextEditingController(text: widget.user.alternateMobileNumber);
+    _alternateMobileCtrl = TextEditingController(
+      text: widget.user.alternateMobileNumber,
+    );
     _tempAddressCtrl = TextEditingController(text: widget.user.tempraryAddress);
-    _permAddressCtrl = TextEditingController(text: widget.user.perpanentAddress);
+    _permAddressCtrl = TextEditingController(
+      text: widget.user.perpanentAddress,
+    );
   }
 
   @override
@@ -43,11 +49,27 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     super.dispose();
   }
 
-  void _handleImageEdit() {
-    // TODO: Implement image picker
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Image picker will be implemented")),
+  File? _selectedImage;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _handleImageEdit() async {
+    final XFile? picked = await _picker.pickImage(
+      source: ImageSource.gallery, // change to camera if needed
+      imageQuality: 80,
     );
+
+    if (picked != null) {
+      setState(() {
+        _selectedImage = File(picked.path);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Image selected successfully")),
+      );
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("No image selected")));
+    }
   }
 
   Future<void> _handleSave() async {
@@ -72,12 +94,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
-      body: Stack(
-        children: [
-          _buildHeader(),
-          _buildContent(),
-        ],
-      ),
+      body: Stack(children: [_buildHeader(), _buildContent()]),
     );
   }
 
@@ -137,7 +154,9 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
             ],
           ),
           child: ClipOval(
-            child: widget.user.imgurl.isNotEmpty
+            child: _selectedImage != null
+                ? Image.file(_selectedImage!, fit: BoxFit.cover)
+                : widget.user.imgurl.isNotEmpty
                 ? Image.network(
                     widget.user.imgurl.replaceRange(7, 16, "192.168.1.11"),
                     fit: BoxFit.cover,
@@ -184,18 +203,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            AppThemeData.primary400,
-            AppThemeData.primary600,
-          ],
+          colors: [AppThemeData.primary400, AppThemeData.primary600],
         ),
       ),
       child: const Center(
-        child: Icon(
-          Icons.person,
-          size: 60,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.person, size: 60, color: Colors.white),
       ),
     );
   }
@@ -235,10 +247,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       children: [
         Text(
           widget.user.fullName,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 6),
         Text(
@@ -252,10 +261,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
         const SizedBox(height: 4),
         Text(
           "Update your personal information",
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 13,
-          ),
+          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
         ),
       ],
     );
@@ -267,7 +273,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       children: [
         _buildSectionTitle("Contact Information", Icons.phone),
         const SizedBox(height: 16),
-        
+
         _buildTextField(
           controller: _emailCtrl,
           label: "Email Address",
@@ -357,11 +363,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
             color: AppThemeData.primary500.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            icon,
-            color: AppThemeData.primary500,
-            size: 20,
-          ),
+          child: Icon(icon, color: AppThemeData.primary500, size: 20),
         ),
         const SizedBox(width: 12),
         Text(
@@ -424,7 +426,10 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.red),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],
