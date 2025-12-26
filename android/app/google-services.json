@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "260989102264",
-    "project_id": "ems-offbeat",
-    "storage_bucket": "ems-offbeat.firebasestorage.app"
+    "project_number": "272432089482",
+    "project_id": "offbeat-ems",
+    "storage_bucket": "offbeat-ems.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:260989102264:android:431e1ca7405548a4382c4d",
+        "mobilesdk_app_id": "1:272432089482:android:0d9e6fb88c218c3696a073",
         "android_client_info": {
           "package_name": "com.offbeatsoftwaresolutions.ems"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBE28kw9WGZoCzqALYmSwATsUkyfLZ7AVo"
+          "current_key": "AIzaSyDNJ0A_26FrIugd3CBVyrT74a3MT04lssE"
         }
       ],
       "services": {

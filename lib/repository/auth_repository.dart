@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ems_offbeat/constants/constant.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import 'package:ems_offbeat/utils/token_storage.dart';
@@ -8,20 +9,21 @@ class AuthRepository {
 
   AuthRepository({required this.client});
 
-Future<Map<String, dynamic>> login(String email, String password, String? fcmToken) async {
+Future<Map<String, dynamic>> login(String email, String password, String? fcmToken, String? deviceType) async {
   final url = Uri.parse(
-    "http://www.offbeatsoftwaresolutions.com/api/Auth/login",
+    "${Constant.BASE_URL}/Auth/login",
   );
-
+  print("FCM TOKEN : $fcmToken");
   final response = await client.post(
     url,
     headers: {
       "Content-Type": "application/json",
     },
     body: jsonEncode({
-      "Username": email.trim(),
+      "username": email.trim(),
       "password": password.trim(),
-      "fcmToken": fcmToken,
+      "deviceToken": fcmToken,
+      "deviceType":"android"
     }),
   );
 

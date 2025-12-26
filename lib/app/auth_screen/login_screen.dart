@@ -7,6 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_controller.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
+import 'dart:io' show Platform;
+ 
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -22,7 +24,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _rememberMe = false;
 
   String? _fcmToken;
-
+  String? _deviceType;
+  // St
 
   @override
   void initState() {
@@ -30,6 +33,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     Future.microtask(()async{
         _fcmToken = await FirebaseMessaging.instance.getToken();
     });
+//     if (Platform.isAndroid) {
+//   _deviceType = 
+// } else if (Platform.isIOS) {
+//   _deviceType = 
+// }
   }
 
 
@@ -189,7 +197,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               .login(
                                 _emailController.text.trim(),
                                 _passwordController.text.trim(),
-                                _fcmToken
+                                _fcmToken,
+                                _deviceType,
                               );
                         },
                   child: isLoading

@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBE28kw9WGZoCzqALYmSwATsUkyfLZ7AVo',
-    appId: '1:260989102264:android:431e1ca7405548a4382c4d',
-    messagingSenderId: '260989102264',
-    projectId: 'ems-offbeat',
-    storageBucket: 'ems-offbeat.firebasestorage.app',
+    apiKey: 'AIzaSyDNJ0A_26FrIugd3CBVyrT74a3MT04lssE',
+    appId: '1:272432089482:android:0d9e6fb88c218c3696a073',
+    messagingSenderId: '272432089482',
+    projectId: 'offbeat-ems',
+    storageBucket: 'offbeat-ems.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

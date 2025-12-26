@@ -51,6 +51,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print("thiis is notificatiioon");
       NotificationService.show(
         title: message.notification?.title ?? 'No title',
         body: message.notification?.body ?? 'No body',
