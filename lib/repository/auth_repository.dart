@@ -8,7 +8,7 @@ class AuthRepository {
 
   AuthRepository({required this.client});
 
-Future<Map<String, dynamic>> login(String email, String password) async {
+Future<Map<String, dynamic>> login(String email, String password, String? fcmToken) async {
   final url = Uri.parse(
     "http://www.offbeatsoftwaresolutions.com/api/Auth/login",
   );
@@ -21,6 +21,7 @@ Future<Map<String, dynamic>> login(String email, String password) async {
     body: jsonEncode({
       "Username": email.trim(),
       "password": password.trim(),
+      "fcmToken": fcmToken,
     }),
   );
 
