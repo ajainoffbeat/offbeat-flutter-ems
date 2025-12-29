@@ -273,6 +273,36 @@ Future<bool> updateProfile(Map<String, String> payload) async {
   throw Exception(data["message"] ?? "Failed to update profile");
 }
 
+ Future<Map<String,dynamic>> getTeamLeaves({
+  pageNumber=1,
+  pageSize=10
+ })async {
+final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+  print("inside get team leaves ${response.statusCode}");
+  if (response.statusCode == 200) {
+    print("inside get team leaves 12 ${response.body}");
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Failed to load all leaves");
+  }
+ }
+
+
+
+
 // GetAllLeaves
 Future<Map<String, dynamic>> getAllLeaves({
   required int pageNumber,
@@ -282,7 +312,7 @@ Future<Map<String, dynamic>> getAllLeaves({
   if (token == null) throw Exception("Token not found");
 
   final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+    "${Constant.BASE_URL}/Leave/filter",
   );
 
   final response = await http.get(

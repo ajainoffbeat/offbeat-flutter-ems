@@ -22,6 +22,43 @@ class LeaveController extends Notifier<LeaveState> {
   }
 
   /// ===============================
+  /// LOAD TEAM LEAVES (for reporting / team view)
+  /// ===============================
+  Future<void> loadTeamLeaves() async {
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentFilter: null,
+    );
+
+    try {
+      final repo = ref.read(leaveRepositoryProvider);
+      final result = await repo.getTeamLeaves(pageNumber: 1, pageSize: 10);
+
+      final int code = result["statusCode"];
+      final data = result["data"];
+
+      if (code == 200) {
+        state = state.copyWith(
+          isLoading: false,
+          myLeaves: List<Map<String, dynamic>>.from(data),
+          filteredLeaves: List<Map<String, dynamic>>.from(data),
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: data["message"] ?? "Failed to load team leaves",
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: "Something went wrong: $e",
+      );
+    }
+  }
+
+  /// ===============================
   /// LOAD MY LEAVES
   /// ===============================
   Future<void> loadMyLeaves() async {

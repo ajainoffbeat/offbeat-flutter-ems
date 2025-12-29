@@ -1,6 +1,7 @@
 import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/providers/reporting_provider.dart';
+import 'package:ems_offbeat/providers/role_provider.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
 import 'package:ems_offbeat/widgets/leave_item_card.dart';
@@ -23,6 +24,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   String? _selectedUser;
 
   final List<String> teamUsers = [
+    "All",
     "Amit Jain",
     "Rahul Sharma",
     "Neha Verma",
@@ -40,19 +42,30 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   Widget build(BuildContext context) {
     final leaveState = ref.watch(leaveProvider);
     final isReportingAsync = ref.watch(isReportingProvider);
+    final isSuperAdminAsync = ref.watch(isSuperAdminProvider);
 
     return Scaffold(
       backgroundColor: AppThemeData.primary500,
       body: isReportingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
-            const Center(child: Text("Something went wrong")),
+        error: (_, __) => const Center(child: Text("Something went wrong")),
         data: (isReporting) {
-          return Stack(
-            children: [
-              _buildHeader(),
-              _buildContent(context, leaveState, isReporting),
-            ],
+          return isSuperAdminAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (_, __) => const Center(child: Text("Something went wrong")),
+            data: (isSuperAdmin) {
+              return Stack(
+                children: [
+                  _buildHeader(),
+                  _buildContent(
+                    context,
+                    leaveState,
+                    isReporting: isReporting,
+                    isSuperAdmin: isSuperAdmin,
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -86,7 +99,11 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
 
   // ───────── CONTENT (SCROLLABLE) ─────────
   Widget _buildContent(
-      BuildContext context, leaveState, bool isReporting) {
+    BuildContext context,
+    dynamic leaveState, {
+    required bool isReporting,
+    required bool isSuperAdmin,
+  }) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -122,21 +139,21 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
             /// 🔐 ADMIN TABS
-            if (isReporting)
-              SliverToBoxAdapter(child: _buildAdminTabs()),
+            if (isReporting && !isSuperAdmin)
+              SliverToBoxAdapter(child: _buildAdminTabs(isSuperAdmin)),
 
-            if (isReporting)
+            if (isReporting && !isSuperAdmin)
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
             /// 👥 TEAM USER DROPDOWN
-            if (isReporting && _leaveView == LeaveView.team)
+            if (isReporting && !isSuperAdmin && _leaveView == LeaveView.team)
               SliverToBoxAdapter(child: _buildUserDropdown()),
 
-            if (isReporting && _leaveView == LeaveView.team)
+            if (isReporting && !isSuperAdmin && _leaveView == LeaveView.team)
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
             /// 📌 STATUS FILTER
-            if (!(isReporting && _leaveView == LeaveView.team))
+            if (!(isReporting && !isSuperAdmin && _leaveView == LeaveView.team))
               SliverToBoxAdapter(
                 child: StatusTab(
                   onStatusChanged: (status) {
@@ -149,7 +166,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             const SliverToBoxAdapter(child: Divider()),
 
             /// 📃 LEAVE LIST
-            _buildLeaveSliverList(leaveState),
+            _buildLeaveSliverList(leaveState, _leaveView),
           ],
         ),
       ),
@@ -157,7 +174,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   }
 
   // ───────── ADMIN TABS ─────────
-  Widget _buildAdminTabs() {
+  Widget _buildAdminTabs(bool isSuperAdmin) {
     return Container(
       height: 42,
       decoration: BoxDecoration(
@@ -166,14 +183,14 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
       ),
       child: Row(
         children: [
-          _adminTab("My Leaves", LeaveView.self),
-          _adminTab("Team Leaves", LeaveView.team),
+          _adminTab("My Leaves", LeaveView.self,isSuperAdmin),
+          _adminTab("Team Leaves", LeaveView.team,isSuperAdmin),
         ],
       ),
     );
   }
 
-  Widget _adminTab(String title, LeaveView view) {
+  Widget _adminTab(String title, LeaveView view, bool isSuperAdmin) {
     final isSelected = _leaveView == view;
 
     return Expanded(
@@ -186,18 +203,19 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
 
           final notifier = ref.read(leaveProvider.notifier);
 
-          if (view == LeaveView.team) {
+          if (view == LeaveView.self) {
             notifier.setFilter("Pending");
+            notifier.refresh();
           }
-
-          notifier.refresh();
+           else {
+            notifier.loadTeamLeaves();
+          }
         },
         child: Container(
           alignment: Alignment.center,
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color:
-                isSelected ? AppThemeData.primary500 : Colors.transparent,
+            color: isSelected ? AppThemeData.primary500 : Colors.transparent,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Text(
@@ -226,23 +244,18 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
         ),
       ),
       items: teamUsers
-          .map(
-            (user) => DropdownMenuItem(
-              value: user,
-              child: Text(user),
-            ),
-          )
+          .map((user) => DropdownMenuItem(value: user, child: Text(user)))
           .toList(),
       onChanged: (value) {
         setState(() => _selectedUser = value);
         ref.read(leaveProvider.notifier).setFilter("Pending");
-        ref.read(leaveProvider.notifier).refresh();
+        ref.read(leaveProvider.notifier).loadTeamLeaves();
       },
     );
   }
 
   // ───────── LEAVE LIST (SLIVER) ─────────
-  Widget _buildLeaveSliverList(leaveState) {
+  Widget _buildLeaveSliverList(leaveState, LeaveView leaveView) {
     if (leaveState.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
@@ -266,13 +279,23 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
       return const SliverFillRemaining(child: EmptyState());
     }
 
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
+    if (leaveView == LeaveView.team) {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
+          return LeaveItemCard(
+            leave: leaves[index],
+            canApprove: true,
+            onApprove: () {},
+            onReject: () {},
+          );
+        }, childCount: leaves.length),
+      );
+    } else {
+      return SliverList(
+        delegate: SliverChildBuilderDelegate((context, index) {
           return LeaveItemCard(leave: leaves[index]);
-        },
-        childCount: leaves.length,
-      ),
-    );
+        }, childCount: leaves.length),
+      );
+    }
   }
 }
