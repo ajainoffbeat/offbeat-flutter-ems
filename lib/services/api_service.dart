@@ -223,6 +223,47 @@ Future<void> resetPassword({
   }
 }
 
+
+// Future<bool> updateProfile({
+//     required String email,
+//     required String mobileNumber,
+//     required String alternateMobileNumber,
+//     required String temporaryAddress,
+//     required String permanentAddress,
+//     required String imgBinaryBase64,
+//   }) async {
+//     final token = await TokenStorage.getToken();
+//     if (token == null) throw Exception("Token not found");
+
+//     final userId = JwtHelper.getEmployeeId(token);
+//     if (userId == null) throw Exception("UserId missing");
+
+//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
+
+//     final response = await http.post(
+//       url,
+//       headers: {
+//         "Authorization": "Bearer $token",
+//         "Content-Type": "application/json",
+//       },
+//       body: jsonEncode({
+//         "email": email,
+//         "mobileNumber": mobileNumber,
+//         "alternateMobileNumber": alternateMobileNumber,
+//         "temporaryAddress": temporaryAddress,
+//         "permanentAddress": permanentAddress,
+//         "img": imgBinaryBase64, // binary image in Base64
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else {
+//       final data = jsonDecode(response.body);
+//       throw Exception(data["message"] ?? "Failed to update profile");
+//     }
+//   }
+
 Future<bool> updateProfile(Map<String, String> payload) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
@@ -274,4 +315,31 @@ if (response.body.trim().isNotEmpty) {
 }
 
 throw Exception("Update failed");
+}
+// GetAllLeaves
+Future<Map<String, dynamic>> getAllLeaves({
+  required int pageNumber,
+  required int pageSize,
+}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print("inside get all leaves ${response.body}");
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Failed to load all leaves");
+  }
 }

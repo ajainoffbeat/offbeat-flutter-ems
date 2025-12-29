@@ -22,9 +22,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     /// Load user profile ONCE when screen opens
     Future.microtask(() {
       ref.read(userProvider.notifier).loadUserProfile();
-      final userState = ref.watch(userProvider);
-      String name = "${userState.user?.firstName} ${userState.user?.lastName}";
-      
     });
   }
 
@@ -56,6 +53,7 @@ Widget build(BuildContext context) {
               title: "Edit Profile",
               onTap: () {
                 if (userState.user != null) {
+                  print("User: ${userState.user}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(

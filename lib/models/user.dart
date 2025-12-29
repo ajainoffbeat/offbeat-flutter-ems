@@ -106,4 +106,42 @@ class User {
   }
 
   String get fullName => '$firstName $lastName';
+
+  @override
+String toString() {
+  return 
+      'id: $id, '
+      'firstName: $firstName, '
+      'lastName: $lastName, '
+      'fullName: $fullName, '
+      'departmentName: $departmentName, '
+      'designationName: $designationName, '
+      'genderName: $genderName, '
+      'reportingPerson: $reportingFirstName $reportingLastName, '
+      'employeeCode: $employeeCode, '
+      'emailAddress: $emailAddress, '
+      'officeEmailAddress: $officeEmailAddress, '
+      'mobileNumber: $mobileNumber, '
+      'alternateMobileNumber: $alternateMobileNumber, '
+      'dateOfJoining: $dateOfJoining, '
+      'dob: $dob, '
+      'fatherName: $fatherName, '
+      'panNumber: $panNumber, '
+      'addharNumber: $addharNumber, '
+      'passportNumber: $passportNumber, '
+      'permanentAddress: $permanentAddress, '
+      'temporaryAddress: $temporaryAddress, '
+      'dateOfMarraige: $dateOfMarraige, '
+      'dateOfReleaving: $dateOfReleaving, '
+      'departmentID: $departmentID, '
+      'genderID: $genderID, '
+      'designationID: $designationID, '
+      'reportingPersonID: $reportingPersonID, '
+      'enteredBy: $enteredBy, '
+      'enteredByName: $enteredByName, '
+      'enteredOn: $enteredOn, '
+      'isDeleted: $isDeleted, '
+      'imgurl: $imgurl';
+}
+
 }

@@ -13,4 +13,10 @@ class JwtHelper {
     // ⚠️ Change key if backend uses different name
     return decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']?.toString();
   }
+  static String? getRole(String token) {
+    final decoded = JwtDecoder.decode(token);
+    print("decodedToken In getRoles: $decoded");
+    return decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"]; 
+    // "Admin" | "SuperAdmin" | "User"
+  }
 }

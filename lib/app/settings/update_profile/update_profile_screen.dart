@@ -151,8 +151,10 @@ Future<void> _handleSave() async {
       }
       return;
     }
+    print("Update profile payload: $payload");
 
     final success = await updateProfile(payload);
+    print("Update profile response: $success");
 
    if (success && mounted) {
   ref.read(userProvider.notifier).loadUserProfile(); // refresh profile state

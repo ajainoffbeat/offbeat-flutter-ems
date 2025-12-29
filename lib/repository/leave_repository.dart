@@ -1,6 +1,7 @@
 // lib/repository/leave_repository.dart
+import 'package:ems_offbeat/utils/jwt_helper.dart';
+import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:http/http.dart' as http;
-import '../models/leaveType.dart';
 import '../services/api_service.dart' as leave_service;
 
 class LeaveRepository {
@@ -92,4 +93,41 @@ class LeaveRepository {
       };
     }
   }
+
+  Future<Map<String, dynamic>> getLeaves() async {
+
+
+    
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  final role = JwtHelper.getRole(token);
+
+  if (role == "Admin" || role == "SuperAdmin") {
+   final allLeaves = await leave_service.getAllLeaves(
+      pageNumber: 1,
+      pageSize: 10,
+    );
+     return {
+        "statusCode": 200,
+        "data": {
+          "leaves": allLeaves,
+          "message": "Leaves fetched successfully",
+        },
+      };
+   
+  } else {
+      final Leaves = await leave_service.LeaveService.getMyLeaves();
+     return {
+        "statusCode": 200,
+        "data": {
+          "leaves": Leaves,
+          "message": "Leaves fetched successfully",
+        },
+      };
+
+  }
+
+}
+
+
 } 
