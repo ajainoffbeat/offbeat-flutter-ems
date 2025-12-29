@@ -2,7 +2,6 @@
 import 'package:ems_offbeat/utils/jwt_helper.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:http/http.dart' as http;
-import '../models/leaveType.dart';
 import '../services/api_service.dart' as leave_service;
 
 class LeaveRepository {

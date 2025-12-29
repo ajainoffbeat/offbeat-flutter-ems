@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:ems_offbeat/state/user_state.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +22,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     /// Load user profile ONCE when screen opens
     Future.microtask(() {
       ref.read(userProvider.notifier).loadUserProfile();
-      final userState = ref.watch(userProvider);
-      String name = "${userState.user?.firstName} ${userState.user?.lastName}";
-      
     });
   }
 
