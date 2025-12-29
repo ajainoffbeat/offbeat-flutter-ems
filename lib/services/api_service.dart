@@ -27,6 +27,7 @@ static Future<Map<String, dynamic>> getMyLeaves() async {
   );
 
   if (response.statusCode == 200) {
+    print("response.body ${response.body}");
     return jsonDecode(response.body); // ✅ Map
   } else {
     throw Exception("Failed to load leaves");
@@ -120,6 +121,7 @@ Future<bool> applyLeave({
   if (token == null) throw Exception("Token not found");
   final employeeId = JwtHelper.getEmployeeId(token);
 
+    print("toleaves ${leaveDateFrom} ${leaveDateTo}");
     final body = jsonEncode({
     "EmployeeID": employeeId,
     "EnteredBy": employeeId,
@@ -238,46 +240,6 @@ Future<void> resetPassword({
 }
 
 
-// Future<bool> updateProfile({
-//     required String email,
-//     required String mobileNumber,
-//     required String alternateMobileNumber,
-//     required String temporaryAddress,
-//     required String permanentAddress,
-//     required String imgBinaryBase64,
-//   }) async {
-//     final token = await TokenStorage.getToken();
-//     if (token == null) throw Exception("Token not found");
-
-//     final userId = JwtHelper.getEmployeeId(token);
-//     if (userId == null) throw Exception("UserId missing");
-
-//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
-
-//     final response = await http.post(
-//       url,
-//       headers: {
-//         "Authorization": "Bearer $token",
-//         "Content-Type": "application/json",
-//       },
-//       body: jsonEncode({
-//         "email": email,
-//         "mobileNumber": mobileNumber,
-//         "alternateMobileNumber": alternateMobileNumber,
-//         "temporaryAddress": temporaryAddress,
-//         "permanentAddress": permanentAddress,
-//         "img": imgBinaryBase64, // binary image in Base64
-//       }),
-//     );
-
-//     if (response.statusCode == 200) {
-//       return true;
-//     } else {
-//       final data = jsonDecode(response.body);
-//       throw Exception(data["message"] ?? "Failed to update profile");
-//     }
-//   }
-
 Future<bool> updateProfile(Map<String, String> payload) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
@@ -296,7 +258,7 @@ Future<bool> updateProfile(Map<String, String> payload) async {
     body: jsonEncode(payload),
   );
 // print(response.body);
-// print(response.statusCode);
+  print("the status code is ${response.statusCode} ${response.body}");
   if (response.statusCode == 200) {
     return true;
   }
@@ -311,3 +273,30 @@ Future<bool> updateProfile(Map<String, String> payload) async {
   throw Exception(data["message"] ?? "Failed to update profile");
 }
 
+// GetAllLeaves
+Future<Map<String, dynamic>> getAllLeaves({
+  required int pageNumber,
+  required int pageSize,
+}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+
+  if (response.statusCode == 200) {
+    print("inside get all leaves ${response.body}");
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Failed to load all leaves");
+  }
+}

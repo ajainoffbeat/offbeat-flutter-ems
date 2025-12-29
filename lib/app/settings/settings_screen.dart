@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:ems_offbeat/state/user_state.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,7 @@ Widget build(BuildContext context) {
               title: "Edit Profile",
               onTap: () {
                 if (userState.user != null) {
+                  print("User: ${userState.user}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(

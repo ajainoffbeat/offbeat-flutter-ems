@@ -59,7 +59,7 @@ Future<void> _pickDate({
     setState(() {
       controller.text =
           "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-
+      print("the picked data is ${controller.text}");
       if (controller == _startDateCtrl) {
         _startDate = pickedDate;
         _endDateCtrl.clear();
@@ -306,22 +306,23 @@ Future<void> _pickDate({
                   );
                   return;
                 }
-
+                print("the _startDate is ${_startDate} ** ${_endDate}");
                 // Call the provider method
                 await ref.read(leaveProvider.notifier).applyLeave(
                       // employeeId: 115, 
                       // enteredBy: 93,
                       leaveTypeId: _selectedLeaveType!.id,
-                      leaveDateFrom: DateTime(
-                        _startDate!.year,
-                        _startDate!.month,
-                        _startDate!.day,
-                      ).toUtc().toIso8601String(),
+                      leaveDateFrom: 
+                   DateTime(
+                      _startDate!.year,
+                      _startDate!.month,
+                      _startDate!.day,
+                    ).toIso8601String(),
                       leaveDateTo: DateTime(
                         _endDate!.year,
                         _endDate!.month,
                         _endDate!.day,
-                      ).toUtc().toIso8601String(),
+                      ).toIso8601String(),
                       reason: _reasonCtrl.text,
                     );
               },

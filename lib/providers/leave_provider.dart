@@ -32,14 +32,19 @@ class LeaveController extends Notifier<LeaveState> {
 
     try {
       final repo = ref.read(leaveRepositoryProvider);
-      final result = await repo.getMyLeaves();
+      final result = await repo.getLeaves();
+      
+
+      print("Leave result: $result");
 
       final int code = result["statusCode"];
+      print("Code: $code");
       final data = result["data"];
 
       if (code == 200) {
         // ✅ SAFE PARSING
         final leavesData = data['leaves']?['data'] ?? [];
+        print("{data is: $data}");
 
         state = state.copyWith(
           isLoading: false,
@@ -141,7 +146,9 @@ class LeaveController extends Notifier<LeaveState> {
 
       final code = result["statusCode"];
       final data = result["data"];
-
+      
+      print("Apply leave response: leaveDateFrom leaveDateTo $leaveDateFrom to $leaveDateTo");
+      
       if (code == 200) {
         state = state.copyWith(
           isApplyingLeave: false,

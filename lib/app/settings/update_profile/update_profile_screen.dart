@@ -147,8 +147,10 @@ Future<void> _handleSave() async {
       }
       return;
     }
+    print("Update profile payload: $payload");
 
     final success = await updateProfile(payload);
+    print("Update profile response: $success");
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
