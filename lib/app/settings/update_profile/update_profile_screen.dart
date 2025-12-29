@@ -7,17 +7,19 @@ import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/models/user.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:ems_offbeat/providers/user_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class UpdateProfileScreen extends StatefulWidget {
+class UpdateProfileScreen extends ConsumerStatefulWidget  {
   final User user;
 
   const UpdateProfileScreen({super.key, required this.user});
 
   @override
-  State<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
+  ConsumerState<UpdateProfileScreen> createState() => _UpdateProfileScreenState();
 }
 
-class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
+class _UpdateProfileScreenState extends ConsumerState<UpdateProfileScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _emailCtrl;
@@ -40,6 +42,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     _permAddressCtrl = TextEditingController(
       text: widget.user.permanentAddress,
     );
+
+    
   }
 
   @override
@@ -150,12 +154,14 @@ Future<void> _handleSave() async {
 
     final success = await updateProfile(payload);
 
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully!")),
-      );
-      Navigator.pop(context);
-    }
+   if (success && mounted) {
+  ref.read(userProvider.notifier).loadUserProfile(); // refresh profile state
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Profile updated successfully!")),
+  );
+  Navigator.pop(context);
+}
+
   } catch (e) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,7 +243,7 @@ Future<void> _handleSave() async {
                 ? Image.file(_selectedImage!, fit: BoxFit.cover)
                 : widget.user.imgurl.isNotEmpty
                 ? Image.network(
-                    widget.user.imgurl.replaceRange(7, 16, "192.168.1.11"),
+                   widget.user.imgurl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return _buildDefaultAvatar();
