@@ -298,7 +298,7 @@ Future<Map<String, dynamic>> getAllLeaves({
   if (token == null) throw Exception("Token not found");
 
   final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+    "${Constant.BASE_URL}/Leave/filter",
   );
 
   final response = await http.get(

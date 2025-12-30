@@ -4,7 +4,22 @@ import '../theme/app_theme.dart';
 class LeaveItemCard extends StatelessWidget {
   final Map<String, dynamic> leave;
 
-  const LeaveItemCard({super.key, required this.leave});
+  /// 👤 User info (for Team view)
+  final String? userName;
+
+  /// 🔐 Approval control
+  final bool canApprove;
+  final VoidCallback? onApprove;
+  final VoidCallback? onReject;
+
+  const LeaveItemCard({
+    super.key,
+    required this.leave,
+    this.userName="xyz",
+    this.canApprove = false,
+    this.onApprove,
+    this.onReject,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,60 +37,58 @@ class LeaveItemCard extends StatelessWidget {
     );
 
     return Container(
-  margin: const EdgeInsets.only(bottom: 14),
-  padding: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(16),
-    boxShadow: [
-      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, spreadRadius: 2),
-    ],
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // ─── Header ───
-      Row(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10),
+        ],
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppThemeData.primary100,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.calendar_month_rounded, color: AppThemeData.primary200, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          // ─── User Name (Team View) ───
+          if (userName != null && userName!.isNotEmpty && canApprove) ...[
+            Row(
               children: [
+                const Icon(Icons.person, size: 18, color: AppThemeData.textSecondary),
+                const SizedBox(width: 6),
                 Text(
-                  leaveType,
+                  userName!,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
-                  ),
-                  softWrap: true,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "$fromDate  →  $toDate",
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppThemeData.textSecondary,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+          ],
+
+          // ─── Header ───
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                leaveType,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+                _statusChip(status),
+            ],
           ),
-          const SizedBox(width: 8),
-          _statusChip(status),
-        ],
-      ),
+
+          const SizedBox(height: 10),
+
+          // ─── Date Range ───
+          Text(
+            "$fromDate  →  $toDate",
+            style: const TextStyle(color: AppThemeData.textSecondary),
+          ),
 
       const SizedBox(height: 12),
       const Divider(color: Colors.black12, thickness: 0.6, height: 1),
@@ -100,31 +113,58 @@ class LeaveItemCard extends StatelessWidget {
           ],
         ),
 
-      // ─── Rejection Reason ───
-      if (status == _LeaveStatus.rejected && rejectReason != null && rejectReason.isNotEmpty)
-        Padding(
-          padding: const EdgeInsets.only(top: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Icon(Icons.cancel_rounded, size: 16, color: Colors.red),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  "Rejected: $rejectReason",
-                  style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
-                  softWrap: true,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+          // ─── Rejection Reason ───
+          if (status == _LeaveStatus.rejected &&
+              rejectReason != null &&
+              rejectReason.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                "Rejected: $rejectReason",
+                style: const TextStyle(color: Colors.red, fontSize: 13),
               ),
-            ],
-          ),
-        ),
-    ],
-  ),
-);
+            ),
 
+          // ─── Approve / Reject Buttons ───
+          if (canApprove &&
+              (status == _LeaveStatus.pending ||
+                  status == _LeaveStatus.rejected)) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onApprove,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Approve"),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onReject,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text("Reject"),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   // ───────── STATUS CHIP ─────────
@@ -139,13 +179,11 @@ class LeaveItemCard extends StatelessWidget {
         textColor = Colors.green;
         label = "APPROVED";
         break;
-
       case _LeaveStatus.rejected:
         bgColor = Colors.red.shade50;
         textColor = Colors.red;
         label = "REJECTED";
         break;
-
       case _LeaveStatus.pending:
       default:
         bgColor = Colors.orange.shade50;
