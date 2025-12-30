@@ -1,112 +1,3 @@
-// import 'package:flutter/material.dart';
-// import '../theme/app_theme.dart';
-
-// class LeaveItemCard extends StatelessWidget {
-//   final Map<String, dynamic> leave;
-
-//   const LeaveItemCard({super.key, required this.leave});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final String leaveType = leave['LeaveTypeName'] ?? 'Leave';
-//     final String fromDate = _formatDate(leave['LeaveDateFrom']);
-//     final String toDate = _formatDate(leave['LeaveDateTo']);
-//     final bool isApproved = leave['IsApproved'] == true;
-//     final String? reason = leave['LeaveApplyReason'];
-//     final String? rejectReason = leave['RejectReason'];
-
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 14),
-//       padding: const EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.circular(16),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.05),
-//             blurRadius: 10,
-//           ),
-//         ],
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // ─── Top Row ───
-//           Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               Text(
-//                 leaveType,
-//                 style: const TextStyle(
-//                   fontSize: 16,
-//                   fontWeight: FontWeight.w600,
-//                 ),
-//               ),
-//               _statusChip(isApproved),
-//             ],
-//           ),
-
-//           const SizedBox(height: 10),
-
-//           // ─── Date Range ───
-//           Text(
-//             "$fromDate  →  $toDate",
-//             style: const TextStyle(
-//               color: AppThemeData.textSecondary,
-//             ),
-//           ),
-
-//           const SizedBox(height: 10),
-
-//           // ─── Reason ───
-//           if (reason != null && reason.isNotEmpty)
-//             Text(
-//               "Reason: $reason",
-//               style: const TextStyle(fontSize: 13),
-//             ),
-
-//           if (!isApproved &&
-//               rejectReason != null &&
-//               rejectReason.isNotEmpty)
-//             Padding(
-//               padding: const EdgeInsets.only(top: 6),
-//               child: Text(
-//                 "Rejected: $rejectReason",
-//                 style: const TextStyle(
-//                   color: Colors.red,
-//                   fontSize: 13,
-//                 ),
-//               ),
-//             ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _statusChip(bool isApproved) {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-//       decoration: BoxDecoration(
-//         color: isApproved ? Colors.green.shade50 : Colors.orange.shade50,
-//         borderRadius: BorderRadius.circular(12),
-//       ),
-//       child: Text(
-//         isApproved ? "APPROVED" : "PENDING",
-//         style: TextStyle(
-//           fontSize: 12,
-//           color: isApproved ? Colors.green : Colors.orange,
-//           fontWeight: FontWeight.w600,
-//         ),
-//       ),
-//     );
-//   }
-
-//   static String _formatDate(String date) {
-//     final dt = DateTime.parse(date);
-//     return "${dt.day}/${dt.month}/${dt.year}";
-//   }
-// }
-
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
@@ -131,72 +22,109 @@ class LeaveItemCard extends StatelessWidget {
     );
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-          ),
-        ],
-      ),
-      child: Column(
+  margin: const EdgeInsets.only(bottom: 14),
+  padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(16),
+    boxShadow: [
+      BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, spreadRadius: 2),
+    ],
+  ),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // ─── Header ───
+      Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ─── Header ───
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                leaveType,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              _statusChip(status),
-            ],
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppThemeData.primary100,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(Icons.calendar_month_rounded, color: AppThemeData.primary200, size: 20),
           ),
-
-          const SizedBox(height: 10),
-
-          // ─── Date Range ───
-          Text(
-            "$fromDate  →  $toDate",
-            style: const TextStyle(
-              color: AppThemeData.textSecondary,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  leaveType,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "$fromDate  →  $toDate",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppThemeData.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-
-          const SizedBox(height: 10),
-
-          // ─── Reason ───
-          if (reason != null && reason.isNotEmpty)
-            Text(
-              "Reason: $reason",
-              style: const TextStyle(fontSize: 13),
-            ),
-
-          // ─── Rejection Reason ───
-          if (status == _LeaveStatus.rejected &&
-              rejectReason != null &&
-              rejectReason.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                "Rejected: $rejectReason",
-                style: const TextStyle(
-                  color: Colors.red,
-                  fontSize: 13,
-                ),
-              ),
-            ),
+          const SizedBox(width: 8),
+          _statusChip(status),
         ],
       ),
-    );
+
+      const SizedBox(height: 12),
+      const Divider(color: Colors.black12, thickness: 0.6, height: 1),
+      const SizedBox(height: 12),
+
+      // ─── Reason ───
+      if (reason != null && reason.isNotEmpty)
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.edit_note_rounded, size: 18, color: AppThemeData.textSecondary),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                "Reason: $reason",
+                style: const TextStyle(fontSize: 13),
+                softWrap: true,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+
+      // ─── Rejection Reason ───
+      if (status == _LeaveStatus.rejected && rejectReason != null && rejectReason.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.cancel_rounded, size: 16, color: Colors.red),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  "Rejected: $rejectReason",
+                  style: const TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+                  softWrap: true,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+    ],
+  ),
+);
+
   }
 
   // ───────── STATUS CHIP ─────────

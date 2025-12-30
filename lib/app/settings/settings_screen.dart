@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/providers/user_provider.dart';
 import 'package:ems_offbeat/app/settings/update_profile/update_profile_screen.dart';
-
+import 'package:ems_offbeat/services/api_service.dart' as ApiService;
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -23,6 +23,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Future.microtask(() {
       ref.read(userProvider.notifier).loadUserProfile();
     });
+  }
+
+static Future<void> deviceLogout(BuildContext context) async {
+    await TokenStorage.clearToken();
+    await ApiService.logout();// API request to logout & clear deviceToken
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 
  @override
@@ -196,15 +202,7 @@ Widget _logoutButton(BuildContext context) {
         ),
       ),
       onPressed: () async {
-        // ✅ Clear token + reporting flag
-        await TokenStorage.clearToken();
-
-        // ✅ Navigate to login & clear stack
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/login',
-          (route) => false,
-        );
+       await deviceLogout(context);
       },
       child: const Text(
         "Logout",

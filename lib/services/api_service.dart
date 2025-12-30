@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:ems_offbeat/constants/constant.dart';
 import 'package:ems_offbeat/models/leaveType.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
 import '../utils/token_storage.dart';
 import '../utils/jwt_helper.dart';
@@ -208,61 +209,32 @@ Future<void> resetPassword({
         'newPassword': newPassword,
       }),
     );
-
-    // if (response.statusCode == 200) {
-    //   final data = jsonDecode(response.body);
-    //   if (data['success'] != true) {
-    //     throw Exception(data['message'] ?? 'Failed to reset password');
-    //   }
-    // } else {
-    //   final data = jsonDecode(response.body);
-    //   throw Exception(data['message'] ?? 'Failed to reset password');
-    // }
   } catch (e) {
     throw Exception('${e.toString()}');
   }
 }
 
-
-// Future<bool> updateProfile({
-//     required String email,
-//     required String mobileNumber,
-//     required String alternateMobileNumber,
-//     required String temporaryAddress,
-//     required String permanentAddress,
-//     required String imgBinaryBase64,
-//   }) async {
-//     final token = await TokenStorage.getToken();
-//     if (token == null) throw Exception("Token not found");
-
-//     final userId = JwtHelper.getEmployeeId(token);
-//     if (userId == null) throw Exception("UserId missing");
-
-//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
-
-//     final response = await http.post(
-//       url,
-//       headers: {
-//         "Authorization": "Bearer $token",
-//         "Content-Type": "application/json",
-//       },
-//       body: jsonEncode({
-//         "email": email,
-//         "mobileNumber": mobileNumber,
-//         "alternateMobileNumber": alternateMobileNumber,
-//         "temporaryAddress": temporaryAddress,
-//         "permanentAddress": permanentAddress,
-//         "img": imgBinaryBase64, // binary image in Base64
-//       }),
-//     );
-
-//     if (response.statusCode == 200) {
-//       return true;
-//     } else {
-//       final data = jsonDecode(response.body);
-//       throw Exception(data["message"] ?? "Failed to update profile");
-//     }
-//   }
+Future<void> logout() async {
+  try {
+    String? deviceToken = await FirebaseMessaging.instance.getToken();
+    print("deviceTOken $deviceToken");
+    final response = await http.post(
+      Uri.parse('${Constant.BASE_URL}/Auth/logout'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'deviceToken': deviceToken ?? ""}),
+    );
+    
+    return;
+    // // ✅ Check success using message instead
+    // if (data['message'] == "Logged out successfully" || data['message'].contains("success")) {
+    //   return; // logout success
+    // } else {
+    //   throw Exception(data['message'] ?? 'Logout failed');
+    // }
+  } catch (e) {
+    throw Exception(e.toString());
+  }
+}
 
 Future<bool> updateProfile(Map<String, String> payload) async {
   final token = await TokenStorage.getToken();
@@ -298,24 +270,25 @@ Future<bool> updateProfile(Map<String, String> payload) async {
   }
 
   final streamedResponse = await request.send();
-final response = await http.Response.fromStream(streamedResponse);
+  final response = await http.Response.fromStream(streamedResponse);
 
-if (streamedResponse.statusCode == 200) {
+  if (streamedResponse.statusCode == 200) {
+    if (response.body.trim().isNotEmpty) {
+      final data = jsonDecode(response.body);
+      return (data["updated"] ?? 0) >= 1; // true if 1 or more updated
+    }
+    return true;
+  }
+
+  // ✅ New error handling
   if (response.body.trim().isNotEmpty) {
     final data = jsonDecode(response.body);
-    return (data["updated"] ?? 0) >= 1; // true if 1 or more updated
+    throw Exception(data["message"] ?? "Update failed");
   }
-  return true;
+
+  throw Exception("Update failed");
 }
 
-// ✅ New error handling
-if (response.body.trim().isNotEmpty) {
-  final data = jsonDecode(response.body);
-  throw Exception(data["message"] ?? "Update failed");
-}
-
-throw Exception("Update failed");
-}
 // GetAllLeaves
 Future<Map<String, dynamic>> getAllLeaves({
   required int pageNumber,
