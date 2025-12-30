@@ -2,8 +2,10 @@ import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/providers/reporting_provider.dart';
 import 'package:ems_offbeat/providers/role_provider.dart';
+import 'package:ems_offbeat/services/api_service.dart' as LeaveService;
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/empty_state.dart';
+import 'package:ems_offbeat/widgets/input_dialog.dart';
 import 'package:ems_offbeat/widgets/leave_item_card.dart';
 import 'package:ems_offbeat/widgets/leave_summary_card.dart';
 import 'package:ems_offbeat/widgets/status_tab.dart';
@@ -183,8 +185,8 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
       ),
       child: Row(
         children: [
-          _adminTab("My Leaves", LeaveView.self,isSuperAdmin),
-          _adminTab("Team Leaves", LeaveView.team,isSuperAdmin),
+          _adminTab("My Leaves", LeaveView.self, isSuperAdmin),
+          _adminTab("Team Leaves", LeaveView.team, isSuperAdmin),
         ],
       ),
     );
@@ -206,8 +208,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
           if (view == LeaveView.self) {
             notifier.setFilter("Pending");
             notifier.refresh();
-          }
-           else {
+          } else {
             notifier.loadTeamLeaves();
           }
         },
@@ -282,11 +283,23 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     if (leaveView == LeaveView.team) {
       return SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
+          final leave = leaves[index];
+          final int leaveId = leave['ID']; // 👈 important
+
           return LeaveItemCard(
-            leave: leaves[index],
+            leave: leave,
             canApprove: true,
-            onApprove: () {},
-            onReject: () {},
+            onApprove: () async {
+              await LeaveService.approveLeave(leaveId, approve: true);
+              ref.read(leaveProvider.notifier).loadTeamLeaves();
+            },
+            onReject: () async {
+              final reason=await showTextInputDialog(context);
+              if(reason!=null){
+                await LeaveService.approveLeave(leaveId, approve: false);
+                ref.read(leaveProvider.notifier).loadTeamLeaves();
+              }
+            },
           );
         }, childCount: leaves.length),
       );

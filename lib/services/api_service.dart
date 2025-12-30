@@ -33,6 +33,64 @@ class LeaveService {
   }
 }
 
+Future<Map<String, dynamic>> getTeamLeaves({
+  pageNumber = 1,
+  pageSize = 10,
+}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+  print("inside get team leaves ${response.statusCode}");
+  if (response.statusCode == 200) {
+    print("inside get team leaves 12 ${response.body}");
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Failed to load all leaves");
+  }
+}
+
+Future<void> approveLeave(int leaveId, {bool approve=true}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  Uri url;
+  if(approve){
+    url = Uri.parse('${Constant.BASE_URL}/Leave/approve/$leaveId');
+  }else{
+    url = Uri.parse('${Constant.BASE_URL}/Leave/reject/$leaveId');
+  }
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+        },
+    ); // usually approve = PUT
+    print('Response: ${response.statusCode} - ${response.body}');
+    if (response.statusCode == 200) {
+      print('Leave approved successfully');
+    } else {
+      print('Leave approved successfully');
+      print('Failed to approve leave: ${response.body}');
+    }
+  } catch (e) {
+    print('Leave approved successfully');
+    print('Error approving leave: $e');
+  }
+}
+
 Future<List<LeaveType>> fetchLeaveTypes() async {
   print("🟢 fetchLeaveTypes called");
   final url = Uri.parse("${Constant.BASE_URL}/LeaveType/get-all");
@@ -223,47 +281,6 @@ Future<void> resetPassword({
   }
 }
 
-
-// Future<bool> updateProfile({
-//     required String email,
-//     required String mobileNumber,
-//     required String alternateMobileNumber,
-//     required String temporaryAddress,
-//     required String permanentAddress,
-//     required String imgBinaryBase64,
-//   }) async {
-//     final token = await TokenStorage.getToken();
-//     if (token == null) throw Exception("Token not found");
-
-//     final userId = JwtHelper.getEmployeeId(token);
-//     if (userId == null) throw Exception("UserId missing");
-
-//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
-
-//     final response = await http.post(
-//       url,
-//       headers: {
-//         "Authorization": "Bearer $token",
-//         "Content-Type": "application/json",
-//       },
-//       body: jsonEncode({
-//         "email": email,
-//         "mobileNumber": mobileNumber,
-//         "alternateMobileNumber": alternateMobileNumber,
-//         "temporaryAddress": temporaryAddress,
-//         "permanentAddress": permanentAddress,
-//         "img": imgBinaryBase64, // binary image in Base64
-//       }),
-//     );
-
-//     if (response.statusCode == 200) {
-//       return true;
-//     } else {
-//       final data = jsonDecode(response.body);
-//       throw Exception(data["message"] ?? "Failed to update profile");
-//     }
-//   }
-
 Future<bool> updateProfile(Map<String, String> payload) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
@@ -298,24 +315,25 @@ Future<bool> updateProfile(Map<String, String> payload) async {
   }
 
   final streamedResponse = await request.send();
-final response = await http.Response.fromStream(streamedResponse);
+  final response = await http.Response.fromStream(streamedResponse);
 
-if (streamedResponse.statusCode == 200) {
+  if (streamedResponse.statusCode == 200) {
+    if (response.body.trim().isNotEmpty) {
+      final data = jsonDecode(response.body);
+      return (data["updated"] ?? 0) >= 1; // true if 1 or more updated
+    }
+    return true;
+  }
+
+  // ✅ New error handling
   if (response.body.trim().isNotEmpty) {
     final data = jsonDecode(response.body);
-    return (data["updated"] ?? 0) >= 1; // true if 1 or more updated
+    throw Exception(data["message"] ?? "Update failed");
   }
-  return true;
+
+  throw Exception("Update failed");
 }
 
-// ✅ New error handling
-if (response.body.trim().isNotEmpty) {
-  final data = jsonDecode(response.body);
-  throw Exception(data["message"] ?? "Update failed");
-}
-
-throw Exception("Update failed");
-}
 // GetAllLeaves
 Future<Map<String, dynamic>> getAllLeaves({
   required int pageNumber,
@@ -324,9 +342,7 @@ Future<Map<String, dynamic>> getAllLeaves({
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
 
-  final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/filter",
-  );
+  final url = Uri.parse("${Constant.BASE_URL}/Leave/filter");
 
   final response = await http.get(
     url,

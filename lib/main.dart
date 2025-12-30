@@ -13,13 +13,28 @@ import 'app/splash_screen.dart';
 import 'app/home/home_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'dart:io' show Platform;
+
+Future<void> requestInitialPermissions() async {
+  await Permission.camera.request();
+
+  if (Platform.isIOS) {
+    await Permission.photos.request();
+  } else {
+    await Permission.storage.request();
+  }
+  await Permission.notification.request();
+}
 
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(
     RemoteMessage message) async {
+
     await NotificationService.init();
 
+print("thiis is notificatiioon");
   NotificationService.show(
     title: message.notification?.title ?? 'New Notification',
     body: message.notification?.body ?? '',
@@ -28,14 +43,13 @@ Future<void> firebaseMessagingBackgroundHandler(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // 🔥 Initialize Firebase
+  await requestInitialPermissions();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     await NotificationService.init();
 
     FirebaseMessaging.onBackgroundMessage(
     firebaseMessagingBackgroundHandler,
   );
-
   runApp(const ProviderScope(child: MyApp()));
 }
 
