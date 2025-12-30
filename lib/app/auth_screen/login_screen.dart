@@ -60,7 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     final isLoading = authState.isLoading;
-
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
