@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:ems_offbeat/constants/constant.dart';
 import 'package:ems_offbeat/models/leaveType.dart';
@@ -7,46 +6,45 @@ import '../utils/token_storage.dart';
 import '../utils/jwt_helper.dart';
 
 class LeaveService {
-static Future<Map<String, dynamic>> getMyLeaves() async {
-  final token = await TokenStorage.getToken();
-  if (token == null) throw Exception("Token not found");
+  static Future<Map<String, dynamic>> getMyLeaves() async {
+    final token = await TokenStorage.getToken();
+    if (token == null) throw Exception("Token not found");
 
-  final employeeId = JwtHelper.getEmployeeId(token);
-  if (employeeId == null) throw Exception("EmployeeId missing");
+    final employeeId = JwtHelper.getEmployeeId(token);
+    if (employeeId == null) throw Exception("EmployeeId missing");
 
-  final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/list?employeeId=$employeeId",
-  );
+    final url = Uri.parse(
+      "${Constant.BASE_URL}/Leave/list?employeeId=$employeeId",
+    );
 
-  final response = await http.get(
-    url,
-    headers: {
-      "Authorization": "Bearer $token",
-      "Content-Type": "application/json",
-    },
-  );
+    final response = await http.get(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
 
-  if (response.statusCode == 200) {
-    print("response.body ${response.body}");
-    return jsonDecode(response.body); // ✅ Map
-  } else {
-    throw Exception("Failed to load leaves");
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body); // ✅ Map
+    } else {
+      throw Exception("Failed to load leaves");
+    }
   }
-}
 }
 
 Future<List<LeaveType>> fetchLeaveTypes() async {
   print("🟢 fetchLeaveTypes called");
   final url = Uri.parse("${Constant.BASE_URL}/LeaveType/get-all");
   final token = await TokenStorage.getToken();
-  
+
   if (token == null) {
     print("🔴 Token not found in fetchLeaveTypes");
     throw Exception("Token not found");
   }
-  
+
   print("🟢 Fetching leave types from: $url");
-  
+
   final response = await http.get(
     url,
     headers: {
@@ -68,77 +66,71 @@ Future<List<LeaveType>> fetchLeaveTypes() async {
   }
 }
 
- Future<String> updatePassword({
-    required String userId,
-    required String userName,
-    required String oldPassword,
-    required String newPassword,
-  }) async {
-    final token = await TokenStorage.getToken();
-    if (token == null) {
-      throw Exception("Token not found");
-    }
-
-    final url = Uri.parse(
-      "${Constant.BASE_URL}/User/update-password/$userId",
-    );
-
-    final response = await http.put(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "userName": userName,
-        "password": oldPassword,
-        "newPassword": newPassword,
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data["message"] ?? "Password updated successfully";
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error["message"] ?? "Failed to update password");
-    }
+Future<String> updatePassword({
+  required String userId,
+  required String userName,
+  required String oldPassword,
+  required String newPassword,
+}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) {
+    throw Exception("Token not found");
   }
 
+  final url = Uri.parse("${Constant.BASE_URL}/User/update-password/$userId");
+
+  final response = await http.put(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+    body: jsonEncode({
+      "userName": userName,
+      "password": oldPassword,
+      "newPassword": newPassword,
+    }),
+  );
+
+  if (response.statusCode == 200) {
+    final data = jsonDecode(response.body);
+    return data["message"] ?? "Password updated successfully";
+  } else {
+    final error = jsonDecode(response.body);
+    throw Exception(error["message"] ?? "Failed to update password");
+  }
+}
+
 Future<bool> applyLeave({
-  // required int employeeId,
-  // required int enteredBy,
   required int leaveTypeId,
   required String leaveDateFrom,
   required String leaveDateTo,
   required String reason,
 }) async {
   print("🟢 applyLeave called");
-  
+
   final url = Uri.parse("${Constant.BASE_URL}/Leave/apply");
-  
+
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
   final employeeId = JwtHelper.getEmployeeId(token);
 
-    print("toleaves ${leaveDateFrom} ${leaveDateTo}");
-    final body = jsonEncode({
+  final body = jsonEncode({
     "EmployeeID": employeeId,
     "EnteredBy": employeeId,
-    // "EnteredBy": enteredBy,
     "LeaveTypeID": leaveTypeId,
     "LeaveDateFrom": leaveDateFrom,
     "LeaveDateTo": leaveDateTo,
     "LeaveApplyReason": reason,
   });
-  
+
   print("🟢 API Body: $body");
   // print("data=============>: $data");
   final response = await http.post(
     url,
     headers: {
       "Authorization": "Bearer $token",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
     body: body,
   );
@@ -148,8 +140,6 @@ Future<bool> applyLeave({
 
   return response.statusCode == 200 || response.statusCode == 201;
 }
-
-
 
 Future<void> sendOtpToEmail({required String email}) async {
   try {
@@ -161,11 +151,11 @@ Future<void> sendOtpToEmail({required String email}) async {
     // print('response ${response.body}',);
     // print("EMAIL $email");
     // if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      print("DATA $data");
-      // if (data['success'] != true) {
-      //   throw Exception(data['message'] ?? 'Failed to send OTP');
-      // }
+    final data = jsonDecode(response.body);
+    print("DATA $data");
+    // if (data['success'] != true) {
+    //   throw Exception(data['message'] ?? 'Failed to send OTP');
+    // }
     // } else {
     //   final data = jsonDecode(response.body);
     //   throw Exception(data['message'] ?? 'Failed to send OTP');
@@ -176,30 +166,24 @@ Future<void> sendOtpToEmail({required String email}) async {
 }
 
 /// Verify OTP entered by user
-Future<bool> verifyOtp({
-  required String email,
-  required String otp,
-}) async {
+Future<bool> verifyOtp({required String email, required String otp}) async {
   try {
     print("email otp");
     print("$email $otp");
     final response = await http.post(
       Uri.parse('${Constant.BASE_URL}/User/reset-password/verify'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'otp': otp,
-      }),
+      body: jsonEncode({'email': email, 'otp': otp}),
     );
 
-      final data = jsonDecode(response.body);
-      print("DATAAAAAAAAAAAA $data");
-      return true;
+    final data = jsonDecode(response.body);
+    print("DATAAAAAAAAAAAA $data");
+    return true;
     // if (data.message) {
-      // return data['success'] == true;
+    // return data['success'] == true;
     // } else {
-      // final data = jsonDecode(response.body);
-      // throw Exception(data['message'] ?? 'Invalid OTP');
+    // final data = jsonDecode(response.body);
+    // throw Exception(data['message'] ?? 'Invalid OTP');
     // }
   } catch (e) {
     throw Exception('Error verifying OTP: ${e.toString()}');
@@ -218,13 +202,13 @@ Future<void> resetPassword({
       Uri.parse('${Constant.BASE_URL}/User/reset-password/update'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'userName':userName,
+        'userName': userName,
         'email': email,
         'password': password,
         'newPassword': newPassword,
       }),
     );
-    
+
     // if (response.statusCode == 200) {
     //   final data = jsonDecode(response.body);
     //   if (data['success'] != true) {
@@ -240,6 +224,46 @@ Future<void> resetPassword({
 }
 
 
+// Future<bool> updateProfile({
+//     required String email,
+//     required String mobileNumber,
+//     required String alternateMobileNumber,
+//     required String temporaryAddress,
+//     required String permanentAddress,
+//     required String imgBinaryBase64,
+//   }) async {
+//     final token = await TokenStorage.getToken();
+//     if (token == null) throw Exception("Token not found");
+
+//     final userId = JwtHelper.getEmployeeId(token);
+//     if (userId == null) throw Exception("UserId missing");
+
+//     final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$userId");
+
+//     final response = await http.post(
+//       url,
+//       headers: {
+//         "Authorization": "Bearer $token",
+//         "Content-Type": "application/json",
+//       },
+//       body: jsonEncode({
+//         "email": email,
+//         "mobileNumber": mobileNumber,
+//         "alternateMobileNumber": alternateMobileNumber,
+//         "temporaryAddress": temporaryAddress,
+//         "permanentAddress": permanentAddress,
+//         "img": imgBinaryBase64, // binary image in Base64
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       return true;
+//     } else {
+//       final data = jsonDecode(response.body);
+//       throw Exception(data["message"] ?? "Failed to update profile");
+//     }
+//   }
+
 Future<bool> updateProfile(Map<String, String> payload) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
@@ -249,60 +273,49 @@ Future<bool> updateProfile(Map<String, String> payload) async {
 
   final url = Uri.parse("${Constant.BASE_URL}/Employee/update/$empId");
 
-  final response = await http.post(
-    url,
-    headers: {
-      "Authorization": "Bearer $token",
-      "Content-Type": "application/json",
-    },
-    body: jsonEncode(payload),
-  );
-// print(response.body);
-  print("the status code is ${response.statusCode} ${response.body}");
-  if (response.statusCode == 200) {
-    return true;
+  // ✅ Convert to multipart form request
+  var request = http.MultipartRequest("POST", url);
+  request.headers["Authorization"] = "Bearer $token";
+
+  // Add changed fields
+  payload.forEach((key, value) {
+    if (key != "img") {
+      // don't add img to fields
+      request.fields[key] = value;
+    }
+  });
+  print("payload $payload");
+  // Attach image properly in formData file section
+  if (payload.containsKey("img")) {
+    final imgBytes = base64Decode(payload["img"]!);
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        "Image", // field name backend expects
+        imgBytes,
+        filename: "profile.jpg",
+      ),
+    );
   }
 
-  // ✅ Prevent crash when body is empty
-  if (response.body.trim().isEmpty) {
-    throw Exception("Server returned empty response");
-  }
+  final streamedResponse = await request.send();
+final response = await http.Response.fromStream(streamedResponse);
 
-  // Decode only if body exists
-  final data = jsonDecode(response.body);
-  throw Exception(data["message"] ?? "Failed to update profile");
+if (streamedResponse.statusCode == 200) {
+  if (response.body.trim().isNotEmpty) {
+    final data = jsonDecode(response.body);
+    return (data["updated"] ?? 0) >= 1; // true if 1 or more updated
+  }
+  return true;
 }
 
- Future<Map<String,dynamic>> getTeamLeaves({
-  pageNumber=1,
-  pageSize=10
- })async {
-final token = await TokenStorage.getToken();
-  if (token == null) throw Exception("Token not found");
+// ✅ New error handling
+if (response.body.trim().isNotEmpty) {
+  final data = jsonDecode(response.body);
+  throw Exception(data["message"] ?? "Update failed");
+}
 
-  final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize",
-  );
-
-  final response = await http.get(
-    url,
-    headers: {
-      "Authorization": "Bearer $token",
-      "Content-Type": "application/json",
-    },
-  );
-  print("inside get team leaves ${response.statusCode}");
-  if (response.statusCode == 200) {
-    print("inside get team leaves 12 ${response.body}");
-    return jsonDecode(response.body);
-  } else {
-    throw Exception("Failed to load all leaves");
-  }
- }
-
-
-
-
+throw Exception("Update failed");
+}
 // GetAllLeaves
 Future<Map<String, dynamic>> getAllLeaves({
   required int pageNumber,
