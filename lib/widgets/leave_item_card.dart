@@ -15,7 +15,7 @@ class LeaveItemCard extends StatelessWidget {
   const LeaveItemCard({
     super.key,
     required this.leave,
-    this.userName="xyz",
+    this.userName,
     this.canApprove = false,
     this.onApprove,
     this.onReject,
@@ -24,6 +24,7 @@ class LeaveItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String leaveType = leave['LeaveTypeName'] ?? 'Leave';
+   
     final String fromDate = _formatDate(leave['LeaveDateFrom']);
     final String toDate = _formatDate(leave['LeaveDateTo']);
 
@@ -36,6 +37,8 @@ class LeaveItemCard extends StatelessWidget {
       rejectReason: rejectReason,
     );
 
+  String userName = '${leave['FirstName'] ?? ''} ${leave['LastName'] ?? ''}'.trim();
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -50,13 +53,13 @@ class LeaveItemCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ─── User Name (Team View) ───
-          if (userName != null && userName!.isNotEmpty && canApprove) ...[
+          if (userName.isNotEmpty && canApprove) ...[
             Row(
               children: [
-                const Icon(Icons.person, size: 18, color: AppThemeData.textSecondary),
+                const Icon(Icons.person, size: 25, color: AppThemeData.textSecondary),
                 const SizedBox(width: 6),
                 Text(
-                  userName!,
+                 userName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,

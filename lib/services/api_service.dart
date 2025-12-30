@@ -34,6 +34,64 @@ class LeaveService {
   }
 }
 
+Future<Map<String, dynamic>> getTeamLeaves({
+  pageNumber = 1,
+  pageSize = 10,
+}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+  print("inside get team leaves ${response.statusCode}");
+  if (response.statusCode == 200) {
+    print("inside get team leaves 12 ${response.body}");
+    return jsonDecode(response.body);
+  } else {
+    throw Exception("Failed to load all leaves");
+  }
+}
+
+Future<void> approveLeave(int leaveId, {bool approve=true}) async {
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  Uri url;
+  if(approve){
+    url = Uri.parse('${Constant.BASE_URL}/Leave/approve/$leaveId');
+  }else{
+    url = Uri.parse('${Constant.BASE_URL}/Leave/reject/$leaveId');
+  }
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json"
+        },
+    ); // usually approve = PUT
+    print('Response: ${response.statusCode} - ${response.body}');
+    if (response.statusCode == 200) {
+      print('Leave approved successfully');
+    } else {
+      print('Leave approved successfully');
+      print('Failed to approve leave: ${response.body}');
+    }
+  } catch (e) {
+    print('Leave approved successfully');
+    print('Error approving leave: $e');
+  }
+}
+
 Future<List<LeaveType>> fetchLeaveTypes() async {
   print("🟢 fetchLeaveTypes called");
   final url = Uri.parse("${Constant.BASE_URL}/LeaveType/get-all");
@@ -297,9 +355,7 @@ Future<Map<String, dynamic>> getAllLeaves({
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
 
-  final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/filter",
-  );
+  final url = Uri.parse("${Constant.BASE_URL}/Leave/filter");
 
   final response = await http.get(
     url,
