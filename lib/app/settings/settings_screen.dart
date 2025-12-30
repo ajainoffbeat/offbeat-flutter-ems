@@ -95,6 +95,8 @@ Widget _profileSection(UserState userState) {
       ? "${user.firstName} ${user.lastName}"
       : "Loading...";
 
+  final imageUrl = user?.imgurl; // safely access imgUrl
+
   return Column(
     children: [
       Container(
@@ -102,16 +104,26 @@ Widget _profileSection(UserState userState) {
         width: 90,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: [
-              AppThemeData.primary400,
-              AppThemeData.primary600,
-            ],
-          ),
+          gradient: imageUrl == null || imageUrl.isEmpty
+              ? LinearGradient(
+                  colors: [
+                    AppThemeData.primary400,
+                    AppThemeData.primary600,
+                  ],
+                )
+              : null,
+          image: (imageUrl != null && imageUrl.isNotEmpty)
+              ? DecorationImage(
+                  image: NetworkImage(imageUrl),
+                  fit: BoxFit.cover,
+                )
+              : null,
         ),
-        child: const Center(
-          child: Icon(Icons.person, size: 42, color: Colors.white),
-        ),
+        child: (imageUrl == null || imageUrl.isEmpty)
+            ? const Center(
+                child: Icon(Icons.person, size: 42, color: Colors.white),
+              )
+            : null,
       ),
       const SizedBox(height: 14),
       Text(
@@ -132,6 +144,7 @@ Widget _profileSection(UserState userState) {
     ],
   );
 }
+
 
 
   // ───────── SETTINGS CARD ─────────

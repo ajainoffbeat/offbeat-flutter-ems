@@ -19,7 +19,12 @@ class AuthController extends Notifier<AuthState> {
     return const AuthState();
   }
 
-  Future<void> login(String email, String password, String? fcmToken, String? deviceType) async {
+  Future<void> login(
+    String email,
+    String password,
+    String? fcmToken,
+    String? deviceType,
+  ) async {
     if (email.isEmpty || password.isEmpty) {
       state = state.copyWith(
         message: "Email and password are required",
@@ -32,7 +37,7 @@ class AuthController extends Notifier<AuthState> {
 
     try {
       final repo = ref.read(authRepositoryProvider);
-      final result = await repo.login(email, password,fcmToken, deviceType);
+      final result = await repo.login(email, password, fcmToken, deviceType);
 
       final code = result["statusCode"];
       final data = result["data"];
@@ -44,11 +49,21 @@ class AuthController extends Notifier<AuthState> {
           message: data["message"] ?? "Login successful",
         );
       } else {
-        state = state.copyWith(
-          isLoading: false,
-          success: false,
-          message: data["message"] ?? "Login failed",
-        );
+        if (code == 401) {
+          // specifically handle unauthorized
+          state = state.copyWith(
+            isLoading: false,
+            success: false,
+            message: "Invalid credentials", // or "User not found"
+          ); 
+        } else {
+          // fallback for other failures
+          state = state.copyWith(
+            isLoading: false,
+            success: false,
+            message: data["message"] ?? "Login failed",
+          );
+        }
       }
     } catch (e) {
       state = state.copyWith(

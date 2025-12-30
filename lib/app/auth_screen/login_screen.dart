@@ -8,7 +8,6 @@ import '../../providers/auth_controller.dart';
 import 'package:ems_offbeat/theme/app_theme.dart';
 import 'package:ems_offbeat/widgets/screen_headings.dart';
 import 'dart:io' show Platform;
- 
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -27,26 +26,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _deviceType;
   // St
 
+  String? _emailError;
+  String? _passwordError;
+
   @override
   void initState() {
     super.initState();
-    Future.microtask(()async{
-        _fcmToken = await FirebaseMessaging.instance.getToken();
+    Future.microtask(() async {
+      _fcmToken = await FirebaseMessaging.instance.getToken();
     });
-//     if (Platform.isAndroid) {
-//   _deviceType = 
-// } else if (Platform.isIOS) {
-//   _deviceType = 
-// }
+    //     if (Platform.isAndroid) {
+    //   _deviceType =
+    // } else if (Platform.isIOS) {
+    //   _deviceType =
+    // }
   }
 
-
   @override
-  Widget build(BuildContext context) {  
-
-
-
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+
     /// LISTEN FOR SUCCESS / ERROR MESSAGES
     ref.listen(authProvider, (prev, next) {
       if (next.message != null) {
@@ -67,8 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
-          child:
-           Column(
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 60),
@@ -90,7 +88,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   hint: "Email",
                   icon: Icons.email_outlined,
                 ),
+                onChanged: (_) {
+                  if (_emailError != null) {
+                    setState(() => _emailError = null);
+                  }
+                },
               ),
+              if (_emailError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 8),
+                  child: Text(
+                    _emailError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                  ),
+                ),
 
               const SizedBox(height: 16),
 
@@ -113,31 +124,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ? Icons.visibility_off
                               : Icons.visibility,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
                       ),
                     ),
+                onChanged: (_) {
+                  if (_passwordError != null) {
+                    setState(() => _passwordError = null);
+                  }
+                },
               ),
+
+              if (_passwordError != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, left: 8),
+                  child: Text(
+                    _passwordError!,
+                    style: const TextStyle(color: Colors.red, fontSize: 13),
+                  ),
+                ),
 
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Checkbox(
-                    value: _rememberMe,
-                    onChanged: (v) => setState(() => _rememberMe = v ?? false),
-                    checkColor: Colors.white,
-                    side: const BorderSide(
-                      color: AppThemeData.primary500,
-                      width: 2,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-                  const Text("Remember me"),
+                  // Checkbox(
+                  //   value: _rememberMe,
+                  //   onChanged: (v) => setState(() => _rememberMe = v ?? false),
+                  //   checkColor: Colors.white,
+                  //   side: const BorderSide(
+                  //     color: AppThemeData.primary500,
+                  //     width: 2,
+                  //   ),
+                  //   shape: RoundedRectangleBorder(
+                  //     borderRadius: BorderRadius.circular(4),
+                  //   ),
+                  // ),
+                  // const Text("Remember me"),
                   const Spacer(),
                   TextButton(
                     onPressed: () {
@@ -150,7 +173,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       );
                     },
                     child: const Text(
-                      "Forgot Password",
+                      "Forgot Password?",
                       style: TextStyle(
                         color: AppThemeData.primary500,
                         fontSize: 15,
@@ -161,25 +184,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
 
               const SizedBox(height: 20),
-              // const Center(child: Text("or")),
-              // const SizedBox(height: 20),
-
-              // _socialButton(
-              //   icon: Icons.g_mobiledata,
-              //   text: "Continue with Google",
-              // ),
-              // const SizedBox(height: 18),
-
-              // _socialButton(icon: Icons.apple, text: "Continue with Apple"),
-              // const SizedBox(height: 18),
-
-              // _socialButton(
-              //   icon: Icons.facebook,
-              //   text: "Continue with Facebook",
-              // ),
-
-              // const SizedBox(height: 30),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -192,15 +196,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   onPressed: isLoading
                       ? null
-                      : () {
-                          ref
-                              .read(authProvider.notifier)
-                              .login(
-                                _emailController.text.trim(),
-                                _passwordController.text.trim(),
-                                _fcmToken,
-                                _deviceType,
+                      : () async {
+                          setState(() {
+                            _emailError = _emailController.text.trim().isEmpty
+                                ? "Email is required"
+                                : null;
+                            _passwordError =
+                                _passwordController.text.trim().isEmpty
+                                ? "Password is required"
+                                : null;
+                          });
+
+                          if (_emailError != null || _passwordError != null)
+                            return;
+
+                          try {
+                            await ref
+                                .read(authProvider.notifier)
+                                .login(
+                                  _emailController.text.trim(),
+                                  _passwordController.text.trim(),
+                                  _fcmToken,
+                                  _deviceType,
+                                )
+                                .timeout(const Duration(seconds: 5));
+                          } catch (_) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Something went wrong, please try again",
+                                  ),
+                                ),
                               );
+                            }
+                          }
                         },
                   child: isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
@@ -210,7 +240,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                 ),
               ),
-
               const SizedBox(height: 20),
             ],
           ),

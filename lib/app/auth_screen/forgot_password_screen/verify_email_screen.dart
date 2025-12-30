@@ -15,6 +15,7 @@ class ForgotPasswordEmailScreen extends StatefulWidget {
 class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   final TextEditingController emailCtrl = TextEditingController();
   bool isLoading = false;
+  String? _emailError;
 
   @override
   void dispose() {
@@ -24,14 +25,15 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
 
   Future<void> _sendOtp() async {
     final email = emailCtrl.text.trim();
+    setState(() => _emailError = null);
 
     if (email.isEmpty) {
-      _showSnack("Please enter your email");
+      setState(() => _emailError = "Email is required");
       return;
     }
 
     if (!_isValidEmail(email)) {
-      _showSnack("Please enter a valid email address");
+      setState(() => _emailError = "Enter a valid email");
       return;
     }
 
@@ -53,7 +55,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
         );
       }
     } catch (e) {
-      _showSnack(e.toString().replaceAll("Exception:", ""));
+      _showSnack(e.toString().replaceAll("Exception:", "").trim());
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -66,9 +68,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   }
 
   void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
@@ -110,6 +110,10 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                     TextField(
                       controller: emailCtrl,
                       keyboardType: TextInputType.emailAddress,
+                      onChanged: (_) {
+                        if (_emailError != null)
+                          setState(() => _emailError = null);
+                      },
                       decoration: InputDecoration(
                         hintText: "Enter your email",
                         prefixIcon: const Icon(Icons.email_outlined),
@@ -128,6 +132,17 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                         ),
                       ),
                     ),
+                    if (_emailError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 4),
+                        child: Text(
+                          _emailError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
 
                     const SizedBox(height: 20),
                   ],
@@ -149,18 +164,16 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
                     ),
                   ),
                   onPressed: isLoading ? null : _sendOtp,
-        //            onPressed: () {
-        //               Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => ForgotPasswordOtpScreen(email: "samir@gmail.com"),
-        //   ),
-        // );
-        //             },
+                  //            onPressed: () {
+                  //               Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => ForgotPasswordOtpScreen(email: "samir@gmail.com"),
+                  //   ),
+                  // );
+                  //             },
                   child: isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
+                      ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           "Send Verification Code",
                           style: TextStyle(color: Colors.white),

@@ -22,6 +22,10 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   bool showNew = false;
   bool showConfirm = false;
 
+  String? oldPassError;
+  String? newPassError;
+  String? confirmPassError;
+
   @override
   void dispose() {
     oldPassCtrl.dispose();
@@ -31,22 +35,21 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
   }
 
   Future<void> _updatePassword() async {
-    if (oldPassCtrl.text.isEmpty ||
-        newPassCtrl.text.isEmpty ||
-        confirmPassCtrl.text.isEmpty) {
-      _showSnack("All fields are required");
-      return;
-    }
+    setState(() {
+      oldPassError = oldPassCtrl.text.isEmpty ? "Old password is required" : null;
+      newPassError = newPassCtrl.text.isEmpty ? "New password is required" : null;
+      confirmPassError = confirmPassCtrl.text.isEmpty ? "Confirm password is required" : null;
 
-    if (newPassCtrl.text.length < 6) {
-      _showSnack("Password must be at least 6 characters");
-      return;
-    }
+      if (newPassCtrl.text.length < 6) {
+        newPassError = "Password must be at least 6 characters";
+      }
 
-    if (newPassCtrl.text != confirmPassCtrl.text) {
-      _showSnack("New password and confirm password do not match");
-      return;
-    }
+      if (newPassCtrl.text != confirmPassCtrl.text) {
+        confirmPassError = "Passwords do not match";
+      }
+    });
+
+    if (oldPassError != null || newPassError != null || confirmPassError != null) return;
 
     setState(() => isLoading = true);
 
@@ -57,9 +60,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       final employeeId = JwtHelper.getEmployeeId(token);
       final userName = "ajain@offbeatsoftwaresolutions.in";
 
-      if (employeeId == null || userName == null) {
-        throw Exception("Invalid token data");
-      }
+      if (employeeId == null || userName == null) throw Exception("Invalid token data");
 
       final message = await UpdatePasswordService.updatePassword(
         userId: employeeId,
@@ -68,19 +69,19 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
         newPassword: newPassCtrl.text.trim(),
       );
 
-      _showSnack(message);
-      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+        Navigator.pop(context);
+      }
     } catch (e) {
-      _showSnack(e.toString().replaceAll("Exception:", ""));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll("Exception:", ""))),
+        );
+      }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) setState(() => isLoading = false);
     }
-  }
-
-  void _showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
-    );
   }
 
   InputDecoration _inputDecoration({
@@ -92,9 +93,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       hintText: hint,
       prefixIcon: const Icon(Icons.lock_outline),
       suffixIcon: IconButton(
-        icon: Icon(
-          isVisible ? Icons.visibility : Icons.visibility_off,
-        ),
+        icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off),
         onPressed: toggle,
       ),
       filled: true,
@@ -105,8 +104,7 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide:
-            const BorderSide(color: AppThemeData.primary400, width: 2),
+        borderSide: const BorderSide(color: AppThemeData.primary400, width: 2),
       ),
     );
   }
@@ -125,27 +123,19 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 10),
-
                     IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back,
-                        color: AppThemeData.primary500,
-                      ),
+                      icon: const Icon(Icons.arrow_back, color: AppThemeData.primary500),
                       onPressed: () => Navigator.pop(context),
                     ),
-
                     const SizedBox(height: 10),
-
                     const ScreenHeading(text: "Update Password 🔒"),
                     const SizedBox(height: 6),
                     const ScreenSubtitle(
-                      text:
-                          "Enter your current password and choose a new secure password.",
+                      text: "Enter your current password and choose a new secure password.",
                     ),
-
                     const SizedBox(height: 30),
 
-                    /// OLD PASSWORD
+                    // OLD PASSWORD
                     const TitleText(text: "Old Password"),
                     const SizedBox(height: 6),
                     TextField(
@@ -154,14 +144,18 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       decoration: _inputDecoration(
                         hint: "Old Password",
                         isVisible: showOld,
-                        toggle: () =>
-                            setState(() => showOld = !showOld),
+                        toggle: () => setState(() => showOld = !showOld),
                       ),
                     ),
+                    if (oldPassError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 8),
+                        child: Text(oldPassError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                      ),
 
                     const SizedBox(height: 20),
 
-                    /// NEW PASSWORD
+                    // NEW PASSWORD
                     const TitleText(text: "New Password"),
                     const SizedBox(height: 6),
                     TextField(
@@ -170,14 +164,18 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       decoration: _inputDecoration(
                         hint: "New Password",
                         isVisible: showNew,
-                        toggle: () =>
-                            setState(() => showNew = !showNew),
+                        toggle: () => setState(() => showNew = !showNew),
                       ),
                     ),
+                    if (newPassError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 8),
+                        child: Text(newPassError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                      ),
 
                     const SizedBox(height: 20),
 
-                    /// CONFIRM PASSWORD
+                    // CONFIRM PASSWORD
                     const TitleText(text: "Confirm Password"),
                     const SizedBox(height: 6),
                     TextField(
@@ -186,10 +184,14 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                       decoration: _inputDecoration(
                         hint: "Confirm New Password",
                         isVisible: showConfirm,
-                        toggle: () =>
-                            setState(() => showConfirm = !showConfirm),
+                        toggle: () => setState(() => showConfirm = !showConfirm),
                       ),
                     ),
+                    if (confirmPassError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4, left: 8),
+                        child: Text(confirmPassError!, style: const TextStyle(color: Colors.red, fontSize: 12)),
+                      ),
 
                     const SizedBox(height: 20),
                   ],
@@ -197,10 +199,9 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
               ),
             ),
 
-            /// BOTTOM BUTTON
+            // BOTTOM BUTTON
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
               child: SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -213,13 +214,8 @@ class _UpdatePasswordScreenState extends State<UpdatePasswordScreen> {
                   ),
                   onPressed: isLoading ? null : _updatePassword,
                   child: isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                        )
-                      : const Text(
-                          "Reset Password",
-                          style: TextStyle(color: Colors.white),
-                        ),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text("Reset Password", style: TextStyle(color: Colors.white)),
                 ),
               ),
             ),

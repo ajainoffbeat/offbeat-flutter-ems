@@ -117,7 +117,7 @@ Future<void> _handleSave() async {
 
     // Add only changed & non-empty fields
     if (_emailCtrl.text.trim() != widget.user.emailAddress && _emailCtrl.text.trim().isNotEmpty) {
-      payload["email"] = _emailCtrl.text.trim();
+      payload["emailAddress"] = _emailCtrl.text.trim();
     }
 
     if (_mobileCtrl.text.trim() != widget.user.mobileNumber && _mobileCtrl.text.trim().isNotEmpty) {
