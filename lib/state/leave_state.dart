@@ -14,6 +14,8 @@ class LeaveState {
   final bool isApplyingLeave;
   final bool applyLeaveSuccess;
   final String? applyLeaveMessage;
+  final Map<int, String> teamUsers;
+  final bool isLoadingTeamUsers;
 
   const LeaveState({
     this.isLoading = false,
@@ -28,6 +30,8 @@ class LeaveState {
     this.isApplyingLeave = false,
     this.applyLeaveSuccess = false,
     this.applyLeaveMessage,
+    this.teamUsers = const {},
+    this.isLoadingTeamUsers = false,
   });
 
   LeaveState copyWith({
@@ -43,6 +47,8 @@ class LeaveState {
     bool? isApplyingLeave,
     bool? applyLeaveSuccess,
     String? applyLeaveMessage,
+    Map<int, String>? teamUsers,
+    bool? isLoadingTeamUsers,
   }) {
     return LeaveState(
       isLoading: isLoading ?? this.isLoading,
@@ -57,6 +63,8 @@ class LeaveState {
       isApplyingLeave: isApplyingLeave ?? this.isApplyingLeave,
       applyLeaveSuccess: applyLeaveSuccess ?? this.applyLeaveSuccess,
       applyLeaveMessage: applyLeaveMessage,
+      teamUsers: teamUsers ?? this.teamUsers,
+      isLoadingTeamUsers: isLoadingTeamUsers ?? this.isLoadingTeamUsers,
     );
   }
 
@@ -74,7 +82,9 @@ class LeaveState {
         'usedLeaveBalance: $usedLeaveBalance, '
         'isApplyingLeave: $isApplyingLeave, '
         'applyLeaveSuccess: $applyLeaveSuccess, '
-        'applyLeaveMessage: $applyLeaveMessage'
+        'applyLeaveMessage: $applyLeaveMessage, '
+        'teamUsers: ${teamUsers.length}, '
+        'isLoadingTeamUsers: $isLoadingTeamUsers'
         ')';
   }
 }

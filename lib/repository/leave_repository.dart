@@ -84,9 +84,14 @@ class LeaveRepository {
   Future<Map<String, dynamic>> getTeamLeaves({
     required int pageNumber,
     required int pageSize,
+    required int employeeId,
   }) async {
     try {
-      final allLeaves = await leave_service.getTeamLeaves(pageNumber: pageNumber, pageSize: pageSize);
+      final allLeaves = await leave_service.getTeamLeaves(
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+        employeeId: employeeId != 0 ? employeeId.toString() : "",
+      );
       return {
         "statusCode": 200,
         "data": allLeaves['data'],
@@ -99,9 +104,6 @@ class LeaveRepository {
       };
     }
   }
-
-
-
 
   Future<Map<String, dynamic>> getLeaves() async {
     final token = await TokenStorage.getToken();

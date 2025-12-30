@@ -37,14 +37,15 @@ class LeaveService {
 Future<Map<String, dynamic>> getTeamLeaves({
   pageNumber = 1,
   pageSize = 10,
+  String? employeeId,
 }) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
-  
-  final url = Uri.parse(
-    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize",
-  );
 
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Leave/subordinates/filter?pageNumber=$pageNumber&pageSize=$pageSize&EmployeeId=$employeeId",
+  );
+print("the get team leaves url is $url");
   final response = await http.get(
     url,
     headers: {
@@ -61,13 +62,18 @@ Future<Map<String, dynamic>> getTeamLeaves({
   }
 }
 
-Future<void> approveLeave(int leaveId, {bool approve=true}) async {
+Future<void> approveLeave(
+  int leaveId, {
+  bool approve = true,
+  String reason = "",
+}) async {
   final token = await TokenStorage.getToken();
   if (token == null) throw Exception("Token not found");
   Uri url;
-  if(approve){
+  print("reason:: $reason");
+  if (approve) {
     url = Uri.parse('${Constant.BASE_URL}/Leave/approve/$leaveId');
-  }else{
+  } else {
     url = Uri.parse('${Constant.BASE_URL}/Leave/reject/$leaveId');
   }
 
@@ -76,12 +82,13 @@ Future<void> approveLeave(int leaveId, {bool approve=true}) async {
       url,
       headers: {
         "Authorization": "Bearer $token",
-        "Content-Type": "application/json"
-        },
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode({"rejectReason": reason}),
     ); // usually approve = PUT
     print('Response: ${response.statusCode} - ${response.body}');
     if (response.statusCode == 200) {
-      print('Leave approved successfully');
+      print('Leave approved successfully $url $reason');
     } else {
       print('Leave approved successfully');
       print('Failed to approve leave: ${response.body}');
@@ -281,7 +288,7 @@ Future<void> logout() async {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'deviceToken': deviceToken ?? ""}),
     );
-    
+
     return;
     // // ✅ Check success using message instead
     // if (data['message'] == "Logged out successfully" || data['message'].contains("success")) {
@@ -348,6 +355,44 @@ Future<bool> updateProfile(Map<String, String> payload) async {
 }
 
 // GetAllLeaves
+Future<Map<int, String>> fetchTeamUsers() async {
+  print("inside fetch team users");
+  final token = await TokenStorage.getToken();
+  if (token == null) throw Exception("Token not found");
+  final reportingId=JwtHelper.getEmployeeId(token);
+  print("reportingId $reportingId");
+  final url = Uri.parse(
+    "${Constant.BASE_URL}/Employee/subordinates/filter?Reportingid=$reportingId",
+  );
+
+  final response = await http.get(
+    url,
+    headers: {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    },
+  );
+ final Map<int, String> idToFirstName ={};
+    idToFirstName.addAll({0: "All"});
+    idToFirstName.addAll({
+      for (var e in jsonDecode(response.body)['data'])
+        e['ID'] as int : (e['FirstName'] ?? '').toString().trim()
+    });
+  print("the users are $idToFirstName");
+  return idToFirstName;
+
+  // final List<String> teamUsers = ["All","user 1","user 2","user 3","user 4","user 5",];
+  // return teamUsers;
+  // if (response.statusCode == 200) {
+  //   final List<dynamic> data = jsonDecode(response.body);
+  //   // Add "All" at the beginning and convert to list of strings
+
+  //   //teamUsers.addAll(data.map((user) => user['name']?.toString() ?? user.toString()).cast<String>());
+  // } else {
+  //   throw Exception("Failed to load team users");
+  // }
+}
+
 Future<Map<String, dynamic>> getAllLeaves({
   required int pageNumber,
   required int pageSize,

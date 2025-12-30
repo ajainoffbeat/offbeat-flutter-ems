@@ -1,4 +1,3 @@
-import 'package:ems_offbeat/app/leaves/leave_apply_sheet.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/providers/reporting_provider.dart';
 import 'package:ems_offbeat/providers/role_provider.dart';
@@ -23,14 +22,7 @@ class LeaveScreen extends ConsumerStatefulWidget {
 
 class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   LeaveView _leaveView = LeaveView.self;
-  String? _selectedUser;
-
-  final List<String> teamUsers = [
-    "All",
-    "Amit Jain",
-    "Rahul Sharma",
-    "Neha Verma",
-  ];
+  int? _selectedUser;
 
   @override
   void initState() {
@@ -40,6 +32,17 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     });
   }
 
+  /// 🔄 PULL TO REFRESH HANDLER
+  Future<void> _onRefresh() async {
+    final notifier = ref.read(leaveProvider.notifier);
+
+    if (_leaveView == LeaveView.self) {
+      await notifier.refresh();
+    } else {
+      await notifier.loadTeamLeaves(employeeId: _selectedUser ?? 0);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final leaveState = ref.watch(leaveProvider);
@@ -47,7 +50,18 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     final isSuperAdminAsync = ref.watch(isSuperAdminProvider);
 
     return Scaffold(
-      backgroundColor: AppThemeData.primary500,
+      appBar: AppBar(
+        title: const Text(
+          "Welcome to Ems Offbeat",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: AppThemeData.primary500,
+      ),
       body: isReportingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(child: Text("Something went wrong")),
@@ -56,16 +70,11 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (_, __) => const Center(child: Text("Something went wrong")),
             data: (isSuperAdmin) {
-              return Stack(
-                children: [
-                  _buildHeader(),
-                  _buildContent(
-                    context,
-                    leaveState,
-                    isReporting: isReporting,
-                    isSuperAdmin: isSuperAdmin,
-                  ),
-                ],
+              return _buildContent(
+                context,
+                leaveState,
+                isReporting: isReporting,
+                isSuperAdmin: isSuperAdmin,
               );
             },
           );
@@ -74,87 +83,39 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     );
   }
 
-  // ───────── HEADER ─────────
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 50, 24, 20),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Ready to escape the\nspreadsheet jungle?",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            "Submit your leave, kick back, and recharge.",
-            style: TextStyle(color: Colors.white70, fontSize: 15),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ───────── CONTENT (SCROLLABLE) ─────────
+  // ───────── MAIN CONTENT ─────────
   Widget _buildContent(
     BuildContext context,
     dynamic leaveState, {
     required bool isReporting,
     required bool isSuperAdmin,
   }) {
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.68,
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        ),
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      color: Colors.white,
+      child: RefreshIndicator(
+        onRefresh: _onRefresh,
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
-            /// 📊 SUMMARY
-            SliverToBoxAdapter(
-              child: Row(
-                children: [
-                  LeaveSummaryCard(
-                    title: "Annual Left",
-                    value: "${leaveState.annualLeaveRemaining}",
-                    icon: Icons.event_available,
-                  ),
-                  const SizedBox(width: 12),
-                  LeaveSummaryCard(
-                    title: "Used",
-                    value: "${leaveState.usedLeaveBalance}",
-                    icon: Icons.event_busy,
-                  ),
-                ],
-              ),
-            ),
-
+            _buildTopSummaryCards(leaveState),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
-            /// 🔐 ADMIN TABS
             if (isReporting && !isSuperAdmin)
-              SliverToBoxAdapter(child: _buildAdminTabs(isSuperAdmin)),
+              SliverToBoxAdapter(child: _buildAdminTabs()),
 
             if (isReporting && !isSuperAdmin)
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-            /// 👥 TEAM USER DROPDOWN
             if (isReporting && !isSuperAdmin && _leaveView == LeaveView.team)
               SliverToBoxAdapter(child: _buildUserDropdown()),
 
             if (isReporting && !isSuperAdmin && _leaveView == LeaveView.team)
               const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-            /// 📌 STATUS FILTER
             if (!(isReporting && !isSuperAdmin && _leaveView == LeaveView.team))
               SliverToBoxAdapter(
                 child: StatusTab(
@@ -167,7 +128,6 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             const SliverToBoxAdapter(child: SizedBox(height: 16)),
             const SliverToBoxAdapter(child: Divider()),
 
-            /// 📃 LEAVE LIST
             _buildLeaveSliverList(leaveState, _leaveView),
           ],
         ),
@@ -175,8 +135,33 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     );
   }
 
+  // ───────── TOP SUMMARY ─────────
+  SliverToBoxAdapter _buildTopSummaryCards(dynamic leaveState) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 24),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            LeaveSummaryCard(
+              title: "Annual Left",
+              value: "${leaveState.annualLeaveRemaining}",
+              icon: Icons.event_available,
+            ),
+            const SizedBox(width: 12),
+            LeaveSummaryCard(
+              title: "Used",
+              value: "${leaveState.usedLeaveBalance}",
+              icon: Icons.event_busy,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // ───────── ADMIN TABS ─────────
-  Widget _buildAdminTabs(bool isSuperAdmin) {
+  Widget _buildAdminTabs() {
     return Container(
       height: 42,
       decoration: BoxDecoration(
@@ -185,14 +170,14 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
       ),
       child: Row(
         children: [
-          _adminTab("My Leaves", LeaveView.self, isSuperAdmin),
-          _adminTab("Team Leaves", LeaveView.team, isSuperAdmin),
+          _adminTab("My Leaves", LeaveView.self),
+          _adminTab("Team Leaves", LeaveView.team),
         ],
       ),
     );
   }
 
-  Widget _adminTab(String title, LeaveView view, bool isSuperAdmin) {
+  Widget _adminTab(String title, LeaveView view) {
     final isSelected = _leaveView == view;
 
     return Expanded(
@@ -200,7 +185,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
         onTap: () {
           setState(() {
             _leaveView = view;
-            _selectedUser = null;
+            _selectedUser = 0;
           });
 
           final notifier = ref.read(leaveProvider.notifier);
@@ -209,7 +194,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             notifier.setFilter("Pending");
             notifier.refresh();
           } else {
-            notifier.loadTeamLeaves();
+            notifier.loadTeamLeaves(employeeId: _selectedUser ?? 0);
           }
         },
         child: Container(
@@ -231,12 +216,74 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
     );
   }
 
-  // ───────── TEAM USER DROPDOWN ─────────
+  // ───────── USER DROPDOWN ─────────
   Widget _buildUserDropdown() {
-    return DropdownButtonFormField<String>(
-      value: _selectedUser,
-      decoration: InputDecoration(
-        labelText: "Select Team Member",
+    final leaveState = ref.watch(leaveProvider);
+    print(
+      "the data in if is ${leaveState.teamUsers} ${leaveState.isLoadingTeamUsers}",
+    );
+
+    if (leaveState.isLoadingTeamUsers) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppThemeData.background,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppThemeData.primary500,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              "Loading team members...",
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+    print(
+      "the data in if is ${leaveState.teamUsers} ${leaveState.isLoadingTeamUsers}",
+    );
+    // return DropdownButtonFormField<int>(
+    //   initialValue: _selectedUser,
+    //   menuMaxHeight: 260,
+    //   decoration: InputDecoration(
+    //     labelText: "Select Team Member",
+    //     filled: true,
+    //     fillColor: AppThemeData.background,
+    //     border: OutlineInputBorder(
+    //       borderRadius: BorderRadius.circular(14),
+    //       borderSide: BorderSide.none,
+    //     ),
+    //   ),
+    //   items: leaveState.teamUsers.entries
+    //       .map((entry) => DropdownMenuItem(
+    //             value: entry.key,
+    //             child: Text(entry.value),
+    //           ))
+    //       .toList(),
+    //   onChanged: (value) {
+    //     print("the dropdown value is $value");
+    //     setState(() => _selectedUser = value);
+    //     ref.read(leaveProvider.notifier).setFilter("Pending");
+    //     ref.read(leaveProvider.notifier).loadTeamLeaves(employeeId: value ?? 0);
+    //   },
+    // );
+
+    return DropdownMenu<int>(
+      initialSelection: _selectedUser,
+      label: const Text("Select Team Member"),
+      menuHeight: 250, // fixed + scrollable
+      width: double.infinity,
+      inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppThemeData.background,
         border: OutlineInputBorder(
@@ -244,19 +291,22 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      items: teamUsers
-          .map((user) => DropdownMenuItem(value: user, child: Text(user)))
+      dropdownMenuEntries: leaveState.teamUsers.entries
+          .map(
+            (entry) =>
+                DropdownMenuEntry<int>(value: entry.key, label: entry.value),
+          )
           .toList(),
-      onChanged: (value) {
+      onSelected: (value) {
         setState(() => _selectedUser = value);
         ref.read(leaveProvider.notifier).setFilter("Pending");
-        ref.read(leaveProvider.notifier).loadTeamLeaves();
+        ref.read(leaveProvider.notifier).loadTeamLeaves(employeeId: value ?? 0);
       },
     );
   }
 
-  // ───────── LEAVE LIST (SLIVER) ─────────
-  Widget _buildLeaveSliverList(leaveState, LeaveView leaveView) {
+  // ───────── LEAVE LIST ─────────
+  Widget _buildLeaveSliverList(dynamic leaveState, LeaveView leaveView) {
     if (leaveState.isLoading) {
       return const SliverFillRemaining(
         child: Center(child: CircularProgressIndicator()),
@@ -280,35 +330,42 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
       return const SliverFillRemaining(child: EmptyState());
     }
 
-    if (leaveView == LeaveView.team) {
-      return SliverList(
-        delegate: SliverChildBuilderDelegate((context, index) {
-          final leave = leaves[index];
-          final int leaveId = leave['ID']; // 👈 important
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final leave = leaves[index];
+        final int leaveId = leave['ID'];
 
-          return LeaveItemCard(
-            leave: leave,
-            canApprove: true,
-            onApprove: () async {
-              await LeaveService.approveLeave(leaveId, approve: true);
-              ref.read(leaveProvider.notifier).loadTeamLeaves();
-            },
-            onReject: () async {
-              final reason=await showTextInputDialog(context);
-              if(reason!=null){
-                await LeaveService.approveLeave(leaveId, approve: false);
-                ref.read(leaveProvider.notifier).loadTeamLeaves();
-              }
-            },
-          );
-        }, childCount: leaves.length),
-      );
-    } else {
-      return SliverList(
-        delegate: SliverChildBuilderDelegate((context, index) {
-          return LeaveItemCard(leave: leaves[index]);
-        }, childCount: leaves.length),
-      );
-    }
+        return LeaveItemCard(
+          leave: leave,
+          canApprove:
+              (leaveView == LeaveView.team &&
+              leave['IsApproved'] == false &&
+              leave['IsRejected'] == false),
+          onApprove: leaveView == LeaveView.team
+              ? () async {
+                  await LeaveService.approveLeave(leaveId, approve: true);
+                  ref
+                      .read(leaveProvider.notifier)
+                      .loadTeamLeaves(employeeId: _selectedUser ?? 0);
+                }
+              : null,
+          onReject: leaveView == LeaveView.team
+              ? () async {
+                  final reason = await showTextInputDialog(context);
+                  if (reason != null) {
+                    await LeaveService.approveLeave(
+                      leaveId,
+                      approve: false,
+                      reason: reason,
+                    );
+                    ref
+                        .read(leaveProvider.notifier)
+                        .loadTeamLeaves(employeeId: _selectedUser ?? 0);
+                  }
+                }
+              : null,
+        );
+      }, childCount: leaves.length),
+    );
   }
 }

@@ -22,9 +22,33 @@ class LeaveController extends Notifier<LeaveState> {
   }
 
   /// ===============================
+  /// LOAD TEAM USERS
+  /// ===============================
+  Future<void> loadTeamUsers() async {
+    state = state.copyWith(
+      isLoadingTeamUsers: true,
+      errorMessage: null,
+    );
+
+    try {
+      final teamUsers = await fetchTeamUsers();
+
+      state = state.copyWith(
+        isLoadingTeamUsers: false,
+        teamUsers: teamUsers,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        isLoadingTeamUsers: false,
+        errorMessage: "Failed to load team users: $e",
+      );
+    }
+  }
+
+  /// ===============================
   /// LOAD TEAM LEAVES (for reporting / team view)
   /// ===============================
-  Future<void> loadTeamLeaves() async {
+  Future<void> loadTeamLeaves({required int employeeId}) async {
     state = state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -33,7 +57,7 @@ class LeaveController extends Notifier<LeaveState> {
 
     try {
       final repo = ref.read(leaveRepositoryProvider);
-      final result = await repo.getTeamLeaves(pageNumber: 1, pageSize: 10);
+      final result = await repo.getTeamLeaves(pageNumber: 1, pageSize: 10, employeeId: employeeId);
 
       final int code = result["statusCode"];
       final data = result["data"];
@@ -220,6 +244,7 @@ class LeaveController extends Notifier<LeaveState> {
     await Future.wait([
       loadMyLeaves(),
       loadLeaveTypes(),
+      loadTeamUsers(),
     ]);
   }
 
