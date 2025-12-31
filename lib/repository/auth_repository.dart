@@ -28,6 +28,7 @@ Future<Map<String, dynamic>> login(String email, String password, String? fcmTok
   );
 
   final data = jsonDecode(response.body);
+  print('object $data');
 
   if (response.statusCode == 200 && data["token"] != null) {
     // 🔐 Save JWT

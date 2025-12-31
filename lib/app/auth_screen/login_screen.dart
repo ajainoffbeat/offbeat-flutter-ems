@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'package:ems_offbeat/app/auth_screen/forgot_password_screen/verify_email_screen.dart';
 import 'package:ems_offbeat/utils/token_storage.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -45,22 +46,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    bool isLoading = authState.isLoading;
 
     /// LISTEN FOR SUCCESS / ERROR MESSAGES
-    ref.listen(authProvider, (prev, next) {
-      if (next.message != null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(next.message!)));
+   ref.listen(authProvider, (prev, next) {
+  if (next.message != null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(next.message!)));
+  }
+  if (next.success) {
+    Navigator.pushReplacementNamed(context, '/home');
+  }
+});
 
-        if (next.success) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
-      }
-    });
 
-    final isLoading = authState.isLoading;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -194,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                   ),
-                  onPressed: isLoading
+                  onPressed: authState.isLoading
                       ? null
                       : () async {
                           setState(() {
@@ -232,7 +231,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             }
                           }
                         },
-                  child: isLoading
+                  child: authState.isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           "Log in",

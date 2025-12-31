@@ -38,7 +38,7 @@ class AuthController extends Notifier<AuthState> {
     try {
       final repo = ref.read(authRepositoryProvider);
       final result = await repo.login(email, password, fcmToken, deviceType);
-
+      print("statusCode $result");
       final code = result["statusCode"];
       final data = result["data"];
 
