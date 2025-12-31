@@ -1,3 +1,4 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:ems_offbeat/providers/leave_provider.dart';
 import 'package:ems_offbeat/providers/reporting_provider.dart';
 import 'package:ems_offbeat/providers/role_provider.dart';
@@ -101,7 +102,7 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
             parent: BouncingScrollPhysics(),
           ),
           slivers: [
-            _buildTopSummaryCards(leaveState),
+            //_buildTopSummaryCards(leaveState),
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
             if (isReporting && !isSuperAdmin)
@@ -217,73 +218,66 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
   }
 
   // ───────── USER DROPDOWN ─────────
-  Widget _buildUserDropdown() {
-    final leaveState = ref.watch(leaveProvider);
-    print(
-      "the data in if is ${leaveState.teamUsers} ${leaveState.isLoadingTeamUsers}",
-    );
+ Widget _buildUserDropdown() {
+  final leaveState = ref.watch(leaveProvider);
 
-    if (leaveState.isLoadingTeamUsers) {
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppThemeData.background,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppThemeData.primary500,
-              ),
+  if (leaveState.isLoadingTeamUsers) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppThemeData.background,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppThemeData.primary500,
             ),
-            const SizedBox(width: 12),
-            Text(
-              "Loading team members...",
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
-            ),
-          ],
-        ),
-      );
-    }
-    print(
-      "the data in if is ${leaveState.teamUsers} ${leaveState.isLoadingTeamUsers}",
+          ),
+          const SizedBox(width: 12),
+          Text(
+            "Loading team members...",
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+        ],
+      ),
     );
-    // return DropdownButtonFormField<int>(
-    //   initialValue: _selectedUser,
-    //   menuMaxHeight: 260,
-    //   decoration: InputDecoration(
-    //     labelText: "Select Team Member",
-    //     filled: true,
-    //     fillColor: AppThemeData.background,
-    //     border: OutlineInputBorder(
-    //       borderRadius: BorderRadius.circular(14),
-    //       borderSide: BorderSide.none,
-    //     ),
-    //   ),
-    //   items: leaveState.teamUsers.entries
-    //       .map((entry) => DropdownMenuItem(
-    //             value: entry.key,
-    //             child: Text(entry.value),
-    //           ))
-    //       .toList(),
-    //   onChanged: (value) {
-    //     print("the dropdown value is $value");
-    //     setState(() => _selectedUser = value);
-    //     ref.read(leaveProvider.notifier).setFilter("Pending");
-    //     ref.read(leaveProvider.notifier).loadTeamLeaves(employeeId: value ?? 0);
-    //   },
-    // );
+  }
 
-    return DropdownMenu<int>(
-      initialSelection: _selectedUser,
-      label: const Text("Select Team Member"),
-      menuHeight: 250, // fixed + scrollable
-      width: double.infinity,
-      inputDecorationTheme: InputDecorationTheme(
+  return DropdownSearch<int>(
+    items: (filter, infiniteScrollProps) => leaveState.teamUsers.keys.toList(),
+    selectedItem: _selectedUser,
+    itemAsString: (id) => leaveState.teamUsers[id] ?? "",
+    popupProps: PopupProps.dialog(
+      showSearchBox: true,
+      title: const Padding(
+        padding: EdgeInsets.all(16),
+        child: Text(
+          "Select Team Member",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+      ),
+      searchFieldProps: TextFieldProps(
+        decoration: InputDecoration(
+          hintText: "Search team member...",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      dialogProps: DialogProps(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+    ),
+    decoratorProps: DropDownDecoratorProps(
+      decoration: InputDecoration(
+        labelText: "Select Team Member",
         filled: true,
         fillColor: AppThemeData.background,
         border: OutlineInputBorder(
@@ -291,19 +285,16 @@ class _LeaveScreenState extends ConsumerState<LeaveScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      dropdownMenuEntries: leaveState.teamUsers.entries
-          .map(
-            (entry) =>
-                DropdownMenuEntry<int>(value: entry.key, label: entry.value),
-          )
-          .toList(),
-      onSelected: (value) {
-        setState(() => _selectedUser = value);
-        ref.read(leaveProvider.notifier).setFilter("Pending");
-        ref.read(leaveProvider.notifier).loadTeamLeaves(employeeId: value ?? 0);
-      },
-    );
-  }
+    ),
+    onChanged: (value) {
+      setState(() => _selectedUser = value);
+      ref.read(leaveProvider.notifier).setFilter("Pending");
+      ref
+          .read(leaveProvider.notifier)
+          .loadTeamLeaves(employeeId: value ?? 0);
+    },
+  );
+}
 
   // ───────── LEAVE LIST ─────────
   Widget _buildLeaveSliverList(dynamic leaveState, LeaveView leaveView) {
